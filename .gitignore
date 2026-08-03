@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+._*
+.AppleDouble
+Icon?
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Misc
+*.log

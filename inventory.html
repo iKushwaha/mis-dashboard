@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ugaoo | Inventory Cycle Count Report</title>
+
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="index.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SheetJS CDN (CSV/XLSX parsing) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- Controls Bar -->
+    <div class="control-bar">
+      <h1>
+        <span class="brand-logo" aria-hidden="true"><img src="ugaoo-logo.png" alt="Ugaoo logo"></span>
+      </h1>
+      <div class="control-group">
+        <select id="reportSwitcher" class="report-switcher" title="Switch Report" aria-label="Switch between reports" onchange="location.href=this.value">
+          <option value="rtv.html">Return to Vendor/Origin Report</option>
+          <option value="index.html">Store Dispatch Report</option>
+          <option value="inventory.html" selected>Inventory Cycle Count Report</option>
+        </select>
+        <button id="themeToggle" class="btn btn-secondary btn-icon" title="Toggle Theme" aria-label="Toggle dark/light theme">
+          <!-- Sun/Moon icon toggle handled in JS -->
+          <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+        </button>
+        <button id="addItemBtn" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Cycle Count
+        </button>
+        <button id="importBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Import Data
+        </button>
+        <input type="file" id="fileInput" accept=".json,.csv,.xlsx" style="display: none;">
+
+        <button id="exportJsonBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export JSON
+        </button>
+        <button id="exportCsvBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          Export CSV
+        </button>
+        <button id="printBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          Print / PDF
+        </button>
+        <button id="resetBtn" class="btn btn-danger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          Reset Data
+        </button>
+      </div>
+    </div>
+
+    <!-- Report Header Block -->
+    <header class="report-header">
+      <div class="header-left">
+        <span class="header-badge">Warehouse Operations & Cycle Counting</span>
+        <h2 id="reportTitle">INVENTORY CYCLE COUNT REPORT</h2>
+        <p>Physical verification of stock against system records, variance analysis, and cycle count accuracy</p>
+      </div>
+      <div class="header-right">
+        <div class="header-meta-item">
+          <span class="header-meta-label">Count Date</span>
+          <span class="header-meta-value" id="headerCountDate">-</span>
+        </div>
+        <div class="header-meta-item">
+          <span class="header-meta-label">Counted By</span>
+          <span class="header-meta-value" id="headerCountedBy">Pushpendra</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- KPI Cards Row -->
+    <section class="kpi-container" aria-label="Key Performance Indicators">
+
+      <!-- Total Items Counted -->
+      <article class="kpi-card variant-blue" id="kpiTotalItems">
+        <span class="kpi-label">Total Items Counted</span>
+        <span class="kpi-value" id="valTotalItems">0</span>
+        <span class="kpi-subtext" id="subTotalItems">SKU Codes Verified</span>
+      </article>
+
+      <!-- System Quantity -->
+      <article class="kpi-card variant-indigo" id="kpiSystemQty">
+        <span class="kpi-label">System Quantity</span>
+        <span class="kpi-value" id="valSystemQty">0</span>
+        <span class="kpi-subtext" id="subSystemQty">Units in WMS</span>
+      </article>
+
+      <!-- Physical Quantity -->
+      <article class="kpi-card variant-green" id="kpiPhysicalQty">
+        <span class="kpi-label">Physical Quantity</span>
+        <span class="kpi-value" id="valPhysicalQty">0</span>
+        <span class="kpi-subtext" id="subPhysicalQty">Units on Floor</span>
+      </article>
+
+      <!-- Total Variance -->
+      <article class="kpi-card variant-red" id="kpiVarianceQty">
+        <span class="kpi-label">Total Variance</span>
+        <span class="kpi-value" id="valVarianceQty">0</span>
+        <span class="kpi-subtext" id="subVarianceQty">0.00% of SKUs</span>
+      </article>
+
+      <!-- Inventory Accuracy / Match Rate -->
+      <article class="kpi-card variant-green" id="kpiMatchRate">
+        <span class="kpi-label">Inventory Accuracy</span>
+        <span class="kpi-value" id="valMatchRate">0.00%</span>
+        <span class="kpi-subtext" id="subMatchRate">0% Items Matched</span>
+      </article>
+
+    </section>
+
+    <!-- Charts Visualization -->
+    <section class="dashboard-section">
+      <h3 class="section-title">Visual Analytics</h3>
+      <div class="chart-toolbar" role="group" aria-label="Chart filter">
+        <span class="chart-toolbar-label">View:</span>
+        <button id="filterByItem" class="btn btn-filter active" type="button">Variance by Item</button>
+        <button id="filterByCategory" class="btn btn-filter" type="button">Variance by Category</button>
+        <span class="chart-toolbar-sep" aria-hidden="true"></span>
+        <label class="chart-toolbar-label" for="chartType">Chart:</label>
+        <select id="chartType" class="chart-select" aria-label="Chart type">
+          <option value="bar" selected>Bar</option>
+          <option value="horizontalBar">Horizontal Bar</option>
+          <option value="line">Line</option>
+          <option value="doughnut">Doughnut</option>
+          <option value="pie">Pie</option>
+          <option value="polarArea">Polar Area</option>
+        </select>
+        <label class="chart-toolbar-label" for="chartMetric">Metric:</label>
+        <select id="chartMetric" class="chart-select" aria-label="Chart metric">
+          <option value="all" selected>All (System / Physical / Variance)</option>
+          <option value="system">System Qty</option>
+          <option value="physical">Physical Qty</option>
+          <option value="variance">Variance (Abs)</option>
+        </select>
+      </div>
+      <div class="chart-card">
+        <h4 style="font-weight: 600; font-size: 1rem;" id="chartTitle">Variance by Item</h4>
+        <div class="chart-container">
+          <canvas id="varianceChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Item-Wise Cycle Count Table -->
+    <section class="dashboard-section">
+      <h3 class="section-title">Item-Wise Cycle Count & Variance Summary</h3>
+      <div class="table-card">
+        <div class="chart-toolbar">
+          <label class="chart-toolbar-label" for="filterStatus">Filter by</label>
+          <select id="filterStatus" class="chart-select">
+            <option value="all">All Statuses</option>
+            <option value="MATCHED">MATCHED</option>
+            <option value="OVER">OVER</option>
+            <option value="SHORT">SHORT</option>
+            <option value="MISSING">MISSING</option>
+          </select>
+          <span class="chart-toolbar-sep"></span>
+          <label class="chart-toolbar-label" for="filterCategory">Category</label>
+          <select id="filterCategory" class="chart-select">
+            <option value="all">All Categories</option>
+          </select>
+          <span class="chart-toolbar-sep"></span>
+          <span id="filterCount" class="chart-toolbar-label" style="text-transform: none;">Showing all</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="inventoryTable">
+            <thead>
+              <tr>
+                <th class="sortable" data-sort="sku"><button type="button" class="th-sort">SKU Code<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="itemName"><button type="button" class="th-sort">Item Name<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="binLocation"><button type="button" class="th-sort">Shelf Code<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="systemQty"><button type="button" class="th-sort">System Qty<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="physicalQty"><button type="button" class="th-sort">Physical Qty<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="variance"><button type="button" class="th-sort">Variance<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="variancePct"><button type="button" class="th-sort">Variance %<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="status"><button type="button" class="th-sort">Status<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="notes"><button type="button" class="th-sort">Notes<span class="sort-arrow"></span></button></th>
+                <th class="table-actions-header">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody">
+              <!-- Dynamically filled via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analysis Cards (Root Cause and Action Items) -->
+    <div class="analysis-container">
+
+      <!-- Operational Variance & Root Cause Analysis -->
+      <section class="dashboard-section">
+        <h3 class="section-title">Operational Variance & Root Cause Analysis</h3>
+        <div class="info-card">
+          <div class="info-list" id="rootCauseList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Action Items & Strategic Recommendations -->
+      <section class="dashboard-section">
+        <h3 class="section-title">Action Items & Strategic Recommendations</h3>
+        <div class="info-card">
+          <div class="info-list" id="recommendationsList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <span id="footerText">Supply Chain & Warehouse Management | Inventory Cycle Count Report</span>
+      <span>Page 1 of 1</span>
+    </footer>
+
+  </div>
+
+  <!-- Cycle Count Add/Edit Dialog Modal -->
+  <dialog id="itemDialog" closedby="any" aria-labelledby="dialogTitle">
+    <div class="dialog-header">
+      <h3 class="dialog-title" id="dialogTitle">Add Cycle Count Record</h3>
+      <button class="dialog-close" id="closeDialogBtn" aria-label="Close dialog">&times;</button>
+    </div>
+
+    <form id="itemForm">
+      <input type="hidden" id="formItemId">
+
+      <div class="form-group">
+        <label for="sku">SKU Code</label>
+        <input type="text" id="sku" class="form-control" placeholder="e.g. COCOPEAT-5KG (auto-filled if blank)">
+      </div>
+
+      <div class="form-group">
+        <label for="itemName">Item Name</label>
+        <input type="text" id="itemName" class="form-control" placeholder="e.g. Cocopeat Block 5kg" required>
+      </div>
+
+      <div class="form-group">
+        <label for="category">Category</label>
+        <input type="text" id="category" class="form-control" placeholder="e.g. SEEDS" required>
+      </div>
+
+      <div class="form-group">
+        <label for="binLocation">Shelf Code</label>
+        <input type="text" id="binLocation" class="form-control" placeholder="e.g. A-01-02" required>
+      </div>
+
+      <div class="form-group">
+        <label for="systemQty">System Quantity</label>
+        <input type="number" id="systemQty" class="form-control" min="0" required>
+      </div>
+
+      <div class="form-group">
+        <label for="physicalQty">Physical Quantity</label>
+        <input type="number" id="physicalQty" class="form-control" min="0" required>
+      </div>
+
+      <div class="form-group">
+        <label for="countedBy">Counted By</label>
+        <input type="text" id="countedBy" class="form-control" placeholder="e.g. Pushpendra" required>
+      </div>
+
+      <div class="form-group">
+        <label for="countDate">Count Date</label>
+        <input type="date" id="countDate" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Notes</label>
+        <input type="text" id="notes" class="form-control" placeholder="e.g. Pending recount, damaged stock, etc.">
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="cancelDialogBtn" class="btn btn-secondary">Cancel</button>
+        <button type="submit" id="saveDialogBtn" class="btn btn-primary">Save Record</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- JavaScript Application -->
+  <script src="data-import.js"></script>
+  <script src="inventory.js"></script>
+
+</body>
+</html>

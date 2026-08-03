@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ugaoo | Store Dispatched Dashboard</title>
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="index.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SheetJS CDN (CSV/XLSX parsing) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Controls Bar -->
+    <div class="control-bar">
+      <h1>
+        <span class="brand-logo" aria-hidden="true"><img src="ugaoo-logo.png" alt="Ugaoo logo"></span>
+      </h1>
+      <div class="control-group">
+        <select id="reportSwitcher" class="report-switcher" title="Switch Report" aria-label="Switch between reports" onchange="location.href=this.value">
+          <option value="rtv.html">Return to Vendor/Origin Report</option>
+          <option value="index.html" selected>Store Dispatch Report</option>
+          <option value="inventory.html">Inventory Cycle Count Report</option>
+        </select>
+        <button id="themeToggle" class="btn btn-secondary btn-icon" title="Toggle Theme" aria-label="Toggle dark/light theme">
+          <!-- Sun/Moon icon toggle handled in JS -->
+          <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+        </button>
+        <button id="addStoreBtn" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Store Dispatch
+        </button>
+        <button id="importBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Import Data
+        </button>
+        <input type="file" id="fileInput" accept=".json,.csv,.xlsx" style="display: none;">
+        
+        <button id="exportJsonBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export JSON
+        </button>
+        <button id="exportCsvBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          Export CSV
+        </button>
+        <button id="printBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          Print / PDF
+        </button>
+        <button id="resetBtn" class="btn btn-danger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          Reset Data
+        </button>
+      </div>
+    </div>
+    
+    <!-- Report Header Block -->
+    <header class="report-header">
+      <div class="header-left">
+        <span class="header-badge">Warehouse Operations & Dispatch</span>
+        <h2 id="reportTitle">STORE DISPATCH REPORT</h2>
+        <p>Comprehensive analysis of PO raising dates, dispatched stock, item counts, and updated shortage root causes</p>
+      </div>
+      <div class="header-right">
+        <div class="header-meta-item">
+          <span class="header-meta-label">Dispatched Date</span>
+          <span class="header-meta-value" id="headerDispatchedDate">30 / 07 / 2026</span>
+        </div>
+        <div class="header-meta-item">
+          <span class="header-meta-label">Verified By</span>
+          <span class="header-meta-value" id="headerVerifiedPerson">Pushpendra</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- KPI Cards Row -->
+    <section class="kpi-container" aria-label="Key Performance Indicators">
+      
+      <!-- Total PO Quantity -->
+      <article class="kpi-card variant-blue" id="kpiTotalPO">
+        <span class="kpi-label">Total PO Quantity</span>
+        <span class="kpi-value" id="valTotalPO">0</span>
+        <span class="kpi-subtext" id="subTotalPO">0 Total Items Requested</span>
+      </article>
+
+      <!-- Total Sent Quantity -->
+      <article class="kpi-card variant-indigo" id="kpiTotalSent">
+        <span class="kpi-label">Total Sent Quantity</span>
+        <span class="kpi-value" id="valTotalSent">0</span>
+        <span class="kpi-subtext" id="subTotalSent">Units Dispatched</span>
+      </article>
+
+      <!-- Total Shortage Quantity -->
+      <article class="kpi-card variant-red" id="kpiTotalShortage">
+        <span class="kpi-label">Total Shortage Qty</span>
+        <span class="kpi-value" id="valTotalShortage">0</span>
+        <span class="kpi-subtext" id="subTotalShortage">0.00% Shortage Variance</span>
+      </article>
+
+      <!-- Fulfillment Efficiency -->
+      <article class="kpi-card variant-green" id="kpiEfficiency">
+        <span class="kpi-label">Fulfillment Efficiency</span>
+        <span class="kpi-value" id="valEfficiency">0.00%</span>
+        <span class="kpi-subtext" id="subEfficiency">Dispatch Rate</span>
+      </article>
+
+      <!-- Delivery Status -->
+      <article class="kpi-card variant-green" id="kpiDeliveryStatus">
+        <span class="kpi-label">Delivery Status</span>
+        <span class="kpi-value" id="valDeliveryStatus">0 Stores Delivered</span>
+        <span class="kpi-subtext" id="subDeliveryStatus">0% Locations Serviced</span>
+      </article>
+
+    </section>
+
+      <!-- Charts Visualization -->
+      <section class="dashboard-section">
+        <h3 class="section-title">Visual Analytics</h3>
+        <div class="chart-card">
+          <h4 style="font-weight: 600; font-size: 1rem;">Quantity Allocation by Store</h4>
+          <div class="chart-container">
+            <canvas id="dispatchChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Store-Wise Table Summary -->
+      <section class="dashboard-section">
+        <h3 class="section-title">Store-Wise Purchase Order & Dispatch Summary</h3>
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="storeTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort="storeName"><button type="button" class="th-sort">Store Name<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="poDate"><button type="button" class="th-sort">PO Raised Date<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="dispatchDate"><button type="button" class="th-sort">Dispatched Date<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="itemsInPo"><button type="button" class="th-sort">No. of Item in PO<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="poQty"><button type="button" class="th-sort">PO Qty<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="sentQty"><button type="button" class="th-sort">Sent Qty<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="shortage"><button type="button" class="th-sort">Shortage Qty<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="verifiedPerson"><button type="button" class="th-sort">Verified By<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="status"><button type="button" class="th-sort">Status<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="reasonOfShortage"><button type="button" class="th-sort">Reason of Shortage<span class="sort-arrow"></span></button></th>
+                  <th class="table-actions-header">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="storeTableBody">
+                <!-- Dynamically filled via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    <!-- Analysis Cards (Shortage and Action Items) -->
+    <div class="analysis-container">
+      
+      <!-- Operational Shortage & Root Cause Analysis -->
+      <section class="dashboard-section">
+        <h3 class="section-title">Operational Shortage & Root Cause Analysis</h3>
+        <div class="info-card">
+          <div class="info-list" id="rootCauseList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Action Items & Strategic Recommendations -->
+      <section class="dashboard-section">
+        <h3 class="section-title">Action Items & Strategic Recommendations</h3>
+        <div class="info-card">
+          <div class="info-list" id="recommendationsList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <span id="footerText">Supply Chain & Warehouse Management | Store Dispatch Report (30/07/2026)</span>
+      <span>Page 1 of 1</span>
+    </footer>
+
+  </div>
+
+  <!-- Store Add/Edit Dialog Modal -->
+  <dialog id="storeDialog" closedby="any" aria-labelledby="dialogTitle">
+    <div class="dialog-header">
+      <h3 class="dialog-title" id="dialogTitle">Add Dispatch Record</h3>
+      <button class="dialog-close" id="closeDialogBtn" aria-label="Close dialog">&times;</button>
+    </div>
+    
+    <form id="storeForm">
+      <input type="hidden" id="formStoreId">
+      
+      <div class="form-group">
+        <label for="storeName">Store Name</label>
+        <input type="text" id="storeName" class="form-control" placeholder="e.g. DLF Phase 1" required>
+      </div>
+
+      <div class="form-group">
+        <label for="poDate">PO Raised Date</label>
+        <input type="date" id="poDate" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="dispatchDate">Dispatched Date</label>
+        <input type="date" id="dispatchDate" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="poQty">PO Quantity</label>
+        <input type="number" id="poQty" class="form-control" min="0" required>
+      </div>
+
+      <div class="form-group">
+        <label for="sentQty">Sent Quantity</label>
+        <input type="number" id="sentQty" class="form-control" min="0" required>
+      </div>
+
+      <div class="form-group">
+        <label for="itemsInPo">Number of Items in PO</label>
+        <input type="number" id="itemsInPo" class="form-control" min="0" required>
+      </div>
+
+      <div class="form-group">
+        <label for="verifiedPerson">Verified By</label>
+        <input type="text" id="verifiedPerson" class="form-control" placeholder="e.g. Pushpendra" required>
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" class="form-control" required>
+          <option value="DELIVERED">DELIVERED</option>
+          <option value="SHORTAGE">SHORTAGE</option>
+          <option value="IN TRANSIT">IN TRANSIT</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="reasonOfShortage">Reason of Shortage</label>
+        <input type="text" id="reasonOfShortage" class="form-control" placeholder="e.g. some Of The Item Block For Future Order">
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="cancelDialogBtn" class="btn btn-secondary">Cancel</button>
+        <button type="submit" id="saveDialogBtn" class="btn btn-primary">Save Record</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- JavaScript Application -->
+  <script src="data-import.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
