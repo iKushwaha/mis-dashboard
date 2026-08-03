@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Reports | MIS Dashboard</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Merged Top Bar -->
+    <div class="control-bar merged-topbar">
+      <h1>
+        <span class="brand-logo" aria-hidden="true"><img src="ugaoo-logo.png" alt="Ugaoo logo"></span>
+        <span>All Reports</span>
+      </h1>
+      <div class="control-group">
+        <a href="#report-store" class="btn btn-secondary">Store Dispatch</a>
+        <a href="#report-inventory" class="btn btn-secondary">Inventory Cycle Count</a>
+        <a href="#report-rtv" class="btn btn-secondary">RTV</a>
+        <span class="chart-toolbar-sep" aria-hidden="true"></span>
+        <button id="themeToggle" class="btn btn-secondary btn-icon" title="Toggle Theme" aria-label="Toggle dark/light theme">
+          <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- All Reports Merged View -->
+    <div class="merged-report">
+
+      <section id="report-store" class="merged-section">
+        <h2 class="merged-section-title">Store Dispatch Report</h2>
+        <iframe src="index.html" class="report-frame" title="Store Dispatch Report"></iframe>
+      </section>
+
+      <section id="report-inventory" class="merged-section">
+        <h2 class="merged-section-title">Inventory Cycle Count Report</h2>
+        <iframe src="inventory.html" class="report-frame" title="Inventory Cycle Count Report"></iframe>
+      </section>
+
+      <section id="report-rtv" class="merged-section">
+        <h2 class="merged-section-title">Return to Vendor/Origin Report</h2>
+        <iframe src="rtv.html" class="report-frame" title="Return to Vendor/Origin Report"></iframe>
+      </section>
+
+    </div>
+
+  </div>
+
+  <script src="all-reports.js"></script>
+</body>
+</html>
