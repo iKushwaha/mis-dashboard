@@ -1,10 +1,11 @@
 # MIS Dashboard
 
-A client-side MIS (Management Information System) reporting suite for supply-chain & warehouse operations, consisting of three linked dashboards:
+A client-side MIS (Management Information System) reporting suite for supply-chain & warehouse operations, consisting of three linked dashboards plus an overview landing page:
 
-1. **Store Dispatch Report** (`index.html`)
-2. **Inventory Cycle Count Report** (`inventory.html`)
-3. **Return to Vendor / Origin (RTV) Report** (`rtv.html`)
+1. **All Reports Overview** (`home.html`) — attractive landing dashboard with live summary KPIs
+2. **Store Dispatch Report** (`index.html`)
+3. **Inventory Cycle Count Report** (`inventory.html`)
+4. **Return to Vendor / Origin (RTV) Report** (`rtv.html`)
 
 Each dashboard is a self-contained single-page app built with vanilla HTML/CSS/JavaScript. All data lives in the browser (LocalStorage); no backend or database is required.
 
@@ -12,6 +13,7 @@ Each dashboard is a self-contained single-page app built with vanilla HTML/CSS/J
 
 | Report | Table | Key Metrics | Charts |
 | --- | --- | --- | --- |
+| All Reports (`home.html`) | Report cards + summary tiles | Dispatch Efficiency, Total Shortage, Inventory Accuracy, Items Counted, RTV Completion Score, Qty Returned | — |
 | Store Dispatch | Store-Wise Purchase Order & Dispatch Summary | Total PO Qty, Total Sent Qty, Total Shortage, Dispatch Efficiency | PO vs Sent vs Shortage by store |
 | Inventory Cycle Count | Item-Wise Cycle Count & Variance Summary | Items Counted, System Qty, Physical Qty, Total Variance (SKU count), Accuracy / Match Rate | Variance by item / by category (bar, line, doughnut, pie, polar area) |
 | RTV | Return Entry Log & Processing Summary | Total Qty Returned, Top Location, Completion Score, Entries Processed | Warehouse % of total volume, channel volume, unboxing / video / booking status |
@@ -62,19 +64,22 @@ python3 -m http.server 8080
 
 Then open:
 
-- http://localhost:8080 – Store Dispatch Report
+- http://localhost:8080/home.html – All Reports Overview
+- http://localhost:8080/index.html – Store Dispatch Report
 - http://localhost:8080/inventory.html – Inventory Cycle Count Report
 - http://localhost:8080/rtv.html – RTV Report
 
-Use the **report switcher** in the header toolbar to jump between the three reports.
+Use the **report switcher** in the header toolbar (on every page) to jump between All Reports, Store Dispatch, Inventory Cycle Count, and RTV.
 
 ## Project Structure
 
 ```
 .
+├── home.html         # All Reports overview / landing page
 ├── index.html        # Store Dispatch Report
 ├── inventory.html    # Inventory Cycle Count Report
 ├── rtv.html          # Return to Vendor/Origin Report
+├── home.js           # Overview logic (live summary KPIs, theme)
 ├── app.js            # Store Dispatch logic
 ├── inventory.js      # Cycle Count logic
 ├── rtv.js            # RTV logic
