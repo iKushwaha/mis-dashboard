@@ -1,4 +1,4 @@
-// Default Store Dispatch Dataset matching the report image
+// Default Store Dispatch Dataset (5 dummy stores for testing)
 const DEFAULT_STORES = [
   {
     id: "store-1",
@@ -6,15 +6,15 @@ const DEFAULT_STORES = [
     poDate: "2026-07-29",
     dispatchDate: "2026-07-30",
     poQty: 473,
-    sentQty: 420,
+    sentQty: 473,
     itemsInPo: 115,
     verifiedPerson: "Pushpendra",
     status: "DELIVERED",
-    reasonOfShortage: "some Of The Item Block For Future Order"
+    reasonOfShortage: "-"
   },
   {
     id: "store-2",
-    storeName: "Pacific",
+    storeName: "Pacific Mall",
     poDate: "2026-07-29",
     dispatchDate: "2026-07-30",
     poQty: 609,
@@ -26,15 +26,39 @@ const DEFAULT_STORES = [
   },
   {
     id: "store-3",
-    storeName: "DLF Summit Plaza",
-    poDate: "2026-04-28",
+    storeName: "Select Citywalk",
+    poDate: "2026-07-28",
     dispatchDate: "2026-07-30",
-    poQty: 4762,
-    sentQty: 4005,
-    itemsInPo: 380,
+    poQty: 1250,
+    sentQty: 890,
+    itemsInPo: 210,
     verifiedPerson: "Pushpendra",
-    status: "DELIVERED",
+    status: "SHORTAGE",
     reasonOfShortage: "material not arranged as per Requested"
+  },
+  {
+    id: "store-4",
+    storeName: "Ambience Mall",
+    poDate: "2026-07-29",
+    dispatchDate: "2026-07-30",
+    poQty: 840,
+    sentQty: 0,
+    itemsInPo: 95,
+    verifiedPerson: "Pushpendra",
+    status: "READY TO DISPATCH",
+    reasonOfShortage: "pending clearance before dispatch"
+  },
+  {
+    id: "store-5",
+    storeName: "V3S Mall",
+    poDate: "2026-07-27",
+    dispatchDate: "2026-07-30",
+    poQty: 320,
+    sentQty: 320,
+    itemsInPo: 40,
+    verifiedPerson: "Pushpendra",
+    status: "IN TRANSIT",
+    reasonOfShortage: "-"
   }
 ];
 
