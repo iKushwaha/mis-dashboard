@@ -83,8 +83,16 @@ let state = {
   skuStoreFilter: "all",
   skuEditingId: null,
   skuSortKey: "sku",
-  skuSortDir: "asc"
+  skuSortDir: "asc",
+  photos: [],
+  lightboxIndex: 0
 };
+
+// Photo gallery storage key (separate from store data)
+const PHOTO_STORAGE_KEY = "warehouse_dashboard_photos_v1";
+const PHOTO_EXTENSIONS = ["png", "jpeg", "jpg"];
+const PHOTO_MAX_DIMENSION = 1280;
+const PHOTO_JPEG_QUALITY = 0.85;
 
 // Shortage configuration
 const SHORTAGE_REASONS = [
@@ -147,6 +155,9 @@ function initApp() {
   document.documentElement.setAttribute("data-theme", state.theme);
   updateThemeIcon();
 
+  // Load gallery photos
+  loadPhotos();
+
   // Setup Event Listeners
   setupEventListeners();
 
@@ -156,6 +167,225 @@ function initApp() {
 
 function saveState() {
   localStorage.setItem("warehouse_dashboard_stores_v2", JSON.stringify(state.stores));
+}
+
+// ===== Photo Gallery =====
+function loadPhotos() {
+  const raw = localStorage.getItem(PHOTO_STORAGE_KEY);
+  if (!raw) return;
+  try {
+    state.photos = JSON.parse(raw);
+    if (!Array.isArray(state.photos)) state.photos = [];
+  } catch (e) {
+    console.error("Error parsing saved photos.", e);
+    state.photos = [];
+  }
+}
+
+function savePhotos() {
+  try {
+    localStorage.setItem(PHOTO_STORAGE_KEY, JSON.stringify(state.photos));
+  } catch (e) {
+    console.error("Could not persist photos.", e);
+    alert("Photo could not be saved because browser storage is full. Delete some photos or use smaller images.");
+    state.photos.pop();
+    renderPhotoGallery();
+  }
+}
+
+function photoExtension(filename) {
+  const ext = String(filename || "").split(".").pop() || "";
+  return ext.toLowerCase();
+}
+
+function isAllowedPhoto(file) {
+  return PHOTO_EXTENSIONS.includes(photoExtension(file.name));
+}
+
+function handlePhotoUpload(files) {
+  const invalid = files.filter(f => !isAllowedPhoto(f));
+  if (invalid.length > 0) {
+    alert(`Only .png, .jpeg and .jpg images are allowed.\nRejected: ${invalid.map(f => f.name).join(", ")}`);
+  }
+
+  const valid = files.filter(f => isAllowedPhoto(f));
+  if (valid.length === 0) return;
+
+  const confirmAdd = confirm(`Upload ${valid.length} photo${valid.length !== 1 ? "s" : ""}? Images will be optimised and saved in your browser.`);
+  if (!confirmAdd) return;
+
+  Promise.all(valid.map(processImageFile))
+    .then(results => {
+      results.forEach((dataUrl, i) => {
+        state.photos.push({
+          id: "photo-" + Date.now() + "-" + i,
+          name: valid[i].name,
+          dataUrl,
+          addedAt: new Date().toISOString()
+        });
+      });
+      savePhotos();
+      renderPhotoGallery();
+    })
+    .catch(err => {
+      console.error(err);
+      alert("One or more photos could not be processed. Please try a valid .png or .jpeg image.");
+    });
+}
+
+function processImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > PHOTO_MAX_DIMENSION || height > PHOTO_MAX_DIMENSION) {
+          const ratio = Math.min(PHOTO_MAX_DIMENSION / width, PHOTO_MAX_DIMENSION / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        const isPng = file.type === "image/png" || photoExtension(file.name) === "png";
+        const dataUrl = canvas.toDataURL(isPng ? "image/png" : "image/jpeg", PHOTO_JPEG_QUALITY);
+        resolve(dataUrl);
+      };
+      img.onerror = () => reject(new Error("Invalid image file: " + file.name));
+      img.src = reader.result;
+    };
+    reader.onerror = () => reject(new Error("Could not read file: " + file.name));
+    reader.readAsDataURL(file);
+  });
+}
+
+function escapeHtml(value) {
+  return String(value === null || value === undefined ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function renderPhotoGallery() {
+  const grid = document.getElementById("photoGrid");
+  const countLabel = document.getElementById("photoCountLabel");
+  const count = state.photos.length;
+  countLabel.innerText = `${count} photo${count !== 1 ? "s" : ""}`;
+
+  grid.innerHTML = "";
+  if (count === 0) {
+    grid.innerHTML = `<div class="photo-empty">No photos uploaded yet. Click "Upload Photo" to attach .png or .jpeg documentation photos.</div>`;
+    return;
+  }
+
+  state.photos.forEach((photo, index) => {
+    const card = document.createElement("div");
+    card.className = "photo-card";
+
+    const addedDate = photo.addedAt ? new Date(photo.addedAt).toLocaleDateString() : "";
+
+    const img = document.createElement("img");
+    img.className = "photo-thumb";
+    img.src = photo.dataUrl;
+    img.alt = escapeHtml(photo.name);
+    img.loading = "lazy";
+    img.title = "Click to view full-screen";
+    img.addEventListener("click", () => openLightbox(index));
+
+    const overlay = document.createElement("div");
+    overlay.className = "photo-overlay";
+    overlay.innerHTML = `
+      <button type="button" class="btn-icon photo-open" title="View full-screen" aria-label="View ${escapeHtml(photo.name)}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+      </button>
+      <button type="button" class="btn-icon photo-delete" title="Delete photo" aria-label="Delete ${escapeHtml(photo.name)}">
+        ${SVG_ICONS.delete}
+      </button>
+    `;
+    overlay.querySelector(".photo-open").addEventListener("click", (e) => {
+      e.stopPropagation();
+      openLightbox(index);
+    });
+    overlay.querySelector(".photo-delete").addEventListener("click", (e) => {
+      e.stopPropagation();
+      deletePhoto(photo.id);
+    });
+
+    const meta = document.createElement("div");
+    meta.className = "photo-meta";
+    meta.title = photo.name;
+    meta.textContent = addedDate ? `${photo.name} · ${addedDate}` : photo.name;
+
+    card.appendChild(img);
+    card.appendChild(overlay);
+    card.appendChild(meta);
+    grid.appendChild(card);
+  });
+}
+
+function deletePhoto(id) {
+  const idx = state.photos.findIndex(p => p.id === id);
+  if (idx === -1) return;
+  if (!confirm("Delete this photo from the gallery?")) return;
+  state.photos.splice(idx, 1);
+  if (state.lightboxIndex >= state.photos.length) {
+    state.lightboxIndex = Math.max(0, state.photos.length - 1);
+  }
+  savePhotos();
+  renderPhotoGallery();
+  updateLightbox();
+}
+
+function openLightbox(index) {
+  if (!state.photos.length) return;
+  state.lightboxIndex = index;
+  updateLightbox();
+  document.getElementById("photoLightbox").hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function updateLightbox() {
+  const img = document.getElementById("lightboxImg");
+  const caption = document.getElementById("lightboxCaption");
+  const prevBtn = document.getElementById("lightboxPrevBtn");
+  const nextBtn = document.getElementById("lightboxNextBtn");
+
+  if (!state.photos.length) {
+    closeLightbox();
+    return;
+  }
+  state.lightboxIndex = (state.lightboxIndex + state.photos.length) % state.photos.length;
+  const photo = state.photos[state.lightboxIndex];
+  img.src = photo.dataUrl;
+  img.alt = escapeHtml(photo.name);
+  caption.textContent = `${photo.name}  ·  ${state.lightboxIndex + 1} / ${state.photos.length}`;
+  prevBtn.disabled = state.photos.length <= 1;
+  nextBtn.disabled = state.photos.length <= 1;
+}
+
+function closeLightbox() {
+  document.getElementById("photoLightbox").hidden = true;
+  document.body.style.overflow = "";
+}
+
+function prevPhoto() {
+  if (state.photos.length > 1) {
+    state.lightboxIndex = (state.lightboxIndex - 1 + state.photos.length) % state.photos.length;
+    updateLightbox();
+  }
+}
+
+function nextPhoto() {
+  if (state.photos.length > 1) {
+    state.lightboxIndex = (state.lightboxIndex + 1) % state.photos.length;
+    updateLightbox();
+  }
 }
 
 // Set up UI Interaction Event Listeners
@@ -404,8 +634,10 @@ function setupEventListeners() {
 
   // Reset All Data
   resetBtn.addEventListener("click", () => {
-    if (confirm("Erase all store dispatch data? This cannot be undone.")) {
+    if (confirm("Erase all store dispatch data and gallery photos? This cannot be undone.")) {
       state.stores = [];
+      state.photos = [];
+      localStorage.removeItem(PHOTO_STORAGE_KEY);
       saveState();
       renderDashboard();
     }
@@ -497,6 +729,35 @@ function setupEventListeners() {
 
   document.getElementById("closeSkuDialogBtn").addEventListener("click", () => skuDialog.close());
   document.getElementById("cancelSkuDialogBtn").addEventListener("click", () => skuDialog.close());
+
+  // Photo Gallery controls
+  const addPhotoBtn = document.getElementById("addPhotoBtn");
+  const photoFileInput = document.getElementById("photoFileInput");
+  const lightbox = document.getElementById("photoLightbox");
+
+  addPhotoBtn.addEventListener("click", () => photoFileInput.click());
+
+  photoFileInput.addEventListener("change", (e) => {
+    const files = Array.from(e.target.files || []);
+    photoFileInput.value = "";
+    if (files.length === 0) return;
+    handlePhotoUpload(files);
+  });
+
+  document.getElementById("lightboxCloseBtn").addEventListener("click", closeLightbox);
+  document.getElementById("lightboxPrevBtn").addEventListener("click", prevPhoto);
+  document.getElementById("lightboxNextBtn").addEventListener("click", nextPhoto);
+
+  lightbox.addEventListener("click", (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (lightbox.hidden) return;
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") prevPhoto();
+    if (e.key === "ArrowRight") nextPhoto();
+  });
 
   ["skuPoQty", "skuSentQty"].forEach(id => {
     document.getElementById(id).addEventListener("input", updateSkuVariancePreview);
@@ -1331,6 +1592,9 @@ function renderDashboard() {
 
   // 5.1 Render Shortage SKU-Wise Details
   renderShortageSection();
+
+  // 5.2 Render Photo Gallery
+  renderPhotoGallery();
 
   // 6. Draw Chart
   renderChart();

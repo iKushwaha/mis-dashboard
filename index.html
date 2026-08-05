@@ -209,6 +209,24 @@
         </div>
       </section>
 
+      <!-- Photo Gallery -->
+      <section class="dashboard-section">
+        <h3 class="section-title">Photo Gallery</h3>
+        <p style="color: var(--text-muted); margin: 0 0 12px;">Attach supporting documentation photos. Only <strong>.png</strong> and <strong>.jpeg / .jpg</strong> formats are accepted. Click any photo to view it full-screen.</p>
+        <div class="chart-toolbar" role="group" aria-label="Photo gallery tools">
+          <button id="addPhotoBtn" class="btn btn-primary" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            Upload Photo
+          </button>
+          <input type="file" id="photoFileInput" accept=".png,.jpeg,.jpg" multiple style="display: none;">
+          <span class="chart-toolbar-sep" aria-hidden="true"></span>
+          <span class="chart-toolbar-label" id="photoCountLabel">0 photo</span>
+        </div>
+        <div class="photo-grid" id="photoGrid">
+          <!-- Dynamically filled via JavaScript -->
+        </div>
+      </section>
+
       <!-- Shortage SKU-Wise Details -->
       <section class="dashboard-section">
         <h3 class="section-title">Shortage SKU-Wise Details</h3>
@@ -423,6 +441,15 @@
       </div>
     </form>
   </dialog>
+
+  <!-- Photo Lightbox -->
+  <div class="lightbox" id="photoLightbox" hidden>
+    <button class="lightbox-close" id="lightboxCloseBtn" type="button" aria-label="Close">&times;</button>
+    <button class="lightbox-nav lightbox-prev" id="lightboxPrevBtn" type="button" aria-label="Previous photo">&#10094;</button>
+    <img id="lightboxImg" alt="Gallery photo">
+    <button class="lightbox-nav lightbox-next" id="lightboxNextBtn" type="button" aria-label="Next photo">&#10095;</button>
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
 
   <!-- JavaScript Application -->
   <script src="src/js/data-import.js"></script>
