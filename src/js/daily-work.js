@@ -597,16 +597,6 @@ function deleteWork(id) {
   renderDashboard();
 }
 
-function exportJson() {
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.manual, null, 2));
-  const a = document.createElement("a");
-  a.setAttribute("href", dataStr);
-  a.setAttribute("download", `daily_work_report_${todayISO()}.json`);
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
 function exportCsv() {
   let csv = "data:text/csv;charset=utf-8,";
   csv += "Work Type,Task,Assignee,Date,Qty,Status,Notes\n";
@@ -741,7 +731,6 @@ function setupEventListeners() {
     await handleImport(file);
   });
 
-  document.getElementById("exportJsonBtn").addEventListener("click", exportJson);
   document.getElementById("exportCsvBtn").addEventListener("click", exportCsv);
   document.getElementById("printBtn").addEventListener("click", () => window.print());
 
