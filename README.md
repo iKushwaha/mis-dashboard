@@ -59,7 +59,7 @@ All data persists in the browser's LocalStorage:
 No installation or build step is required. Serve the directory over any static file server:
 
 ```bash
-python3 -m http.server 8080
+./scripts/serve.sh        # or: python3 -m http.server 8080
 ```
 
 Then open:
@@ -79,13 +79,24 @@ Use the **report switcher** in the header toolbar (on every page) to jump betwee
 ├── index.html        # Store Dispatch Report
 ├── inventory.html    # Inventory Cycle Count Report
 ├── rtv.html          # Return to Vendor/Origin Report
-├── home.js           # Overview logic (live summary KPIs, theme)
-├── app.js            # Store Dispatch logic
-├── inventory.js      # Cycle Count logic
-├── rtv.js            # RTV logic
-├── data-import.js    # Shared bulk-import engine (JSON/CSV/XLSX + validation + preview)
-├── index.css         # Shared styles (themes, layouts, components)
-├── ugaoo-logo.png    # Brand logo used in report headers
+├── src/
+│   ├── css/
+│   │   └── index.css         # Shared styles (themes, layouts, components)
+│   ├── js/
+│   │   ├── home.js           # Overview logic (live summary KPIs, theme)
+│   │   ├── app.js            # Store Dispatch logic
+│   │   ├── inventory.js      # Cycle Count logic
+│   │   ├── rtv.js            # RTV logic
+│   │   └── data-import.js    # Shared bulk-import engine (JSON/CSV/XLSX + validation + preview)
+│   └── assets/
+│       └── ugaoo-logo.png    # Brand logo used in report headers
+├── docs/
+│   ├── data-model.md         # LocalStorage schemas & keys
+│   └── architecture.md       # Page map, module responsibilities
+├── scripts/
+│   └── serve.sh              # Local static file server
+├── tests/
+│   └── smoke.html            # Manual smoke check (all pages / assets load)
 └── .gitignore
 ```
 

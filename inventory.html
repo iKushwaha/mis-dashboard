@@ -6,7 +6,7 @@
   <title>Ugaoo | Inventory Cycle Count Report</title>
 
   <!-- CSS Stylesheets -->
-  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="src/css/index.css">
 
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -20,7 +20,7 @@
     <!-- Controls Bar -->
     <div class="control-bar">
       <h1>
-        <span class="brand-logo" aria-hidden="true"><img src="ugaoo-logo.png" alt="Ugaoo logo"></span>
+        <span class="brand-logo" aria-hidden="true"><img src="src/assets/ugaoo-logo.png" alt="Ugaoo logo"></span>
       </h1>
       <div class="control-group">
         <select id="reportSwitcher" class="report-switcher" title="Switch Report" aria-label="Switch between reports" onchange="location.href=this.value">
@@ -319,8 +319,8 @@
   </dialog>
 
   <!-- JavaScript Application -->
-  <script src="data-import.js"></script>
-  <script src="inventory.js"></script>
+  <script src="src/js/data-import.js"></script>
+  <script src="src/js/inventory.js"></script>
 
 </body>
 </html>

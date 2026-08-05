@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smoke Test | MIS Dashboard</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; }
+    ul { line-height: 1.8; }
+    a { text-decoration: none; color: #2563eb; }
+    .ok { color: #16a34a; }
+    .fail { color: #dc2626; }
+    #result { margin-top: 1rem; padding: .75rem 1rem; border-radius: 8px; background: #f1f5f9; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Smoke Test</h1>
+  <p>Each link must open without 404s or console errors:</p>
+  <ul>
+    <li><a href="home.html">All Reports</a> (home.html)</li>
+    <li><a href="index.html">Store Dispatch</a> (index.html)</li>
+    <li><a href="inventory.html">Inventory Cycle Count</a> (inventory.html)</li>
+    <li><a href="rtv.html">RTV</a> (rtv.html)</li>
+    <li><a href="src/css/index.css">Stylesheet</a> (src/css/index.css)</li>
+    <li><a href="src/assets/ugaoo-logo.png">Logo</a> (src/assets/ugaoo-logo.png)</li>
+  </ul>
+  <p id="result"></p>
+  <script>
+    const checks = [
+      "home.html", "index.html", "inventory.html", "rtv.html",
+      "src/css/index.css", "src/assets/ugaoo-logo.png",
+      "src/js/home.js", "src/js/app.js", "src/js/inventory.js",
+      "src/js/rtv.js", "src/js/data-import.js"
+    ];
+    const result = document.getElementById("result");
+    Promise.all(checks.map((url) =>
+      fetch(url, { method: "HEAD" }).then((r) => r.ok).catch(() => false)
+    )).then((results) => {
+      const failed = checks.filter((_, i) => !results[i]);
+      if (failed.length === 0) {
+        result.textContent = "ALL RESOURCES FOUND - no 404s";
+        result.className = "ok";
+      } else {
+        result.textContent = "MISSING: " + failed.join(", ");
+        result.className = "fail";
+      }
+    });
+  </script>
+</body>
+</html>
