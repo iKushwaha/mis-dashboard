@@ -147,28 +147,30 @@
 
     <!-- Charts Visualization -->
     <section class="dashboard-section">
-      <h3 class="section-title">Visual Analytics</h3>
-      <div class="chart-toolbar" role="group" aria-label="Chart filter">
-        <span class="chart-toolbar-label">View:</span>
-        <button id="filterByItem" class="btn btn-filter active" type="button">Variance by Item</button>
-        <button id="filterByCategory" class="btn btn-filter" type="button">Variance by Category</button>
-        <span class="chart-toolbar-sep" aria-hidden="true"></span>
-        <label class="chart-toolbar-label" for="chartType">Chart:</label>
-        <select id="chartType" class="chart-select" aria-label="Chart type">
-          <option value="bar" selected>Bar</option>
-          <option value="horizontalBar">Horizontal Bar</option>
-          <option value="line">Line</option>
-          <option value="doughnut">Doughnut</option>
-          <option value="pie">Pie</option>
-          <option value="polarArea">Polar Area</option>
-        </select>
-        <label class="chart-toolbar-label" for="chartMetric">Metric:</label>
-        <select id="chartMetric" class="chart-select" aria-label="Chart metric">
-          <option value="all" selected>All (System / Physical / Variance)</option>
-          <option value="system">System Qty</option>
-          <option value="physical">Physical Qty</option>
-          <option value="variance">Variance (Abs)</option>
-        </select>
+      <div class="section-header">
+        <h3 class="section-title">Visual Analytics</h3>
+        <div class="chart-toolbar" role="group" aria-label="Chart filter">
+          <span class="chart-toolbar-label">View:</span>
+          <button id="filterByItem" class="btn btn-filter active" type="button">Variance by Item</button>
+          <button id="filterByCategory" class="btn btn-filter" type="button">Variance by Category</button>
+          <span class="chart-toolbar-sep" aria-hidden="true"></span>
+          <label class="chart-toolbar-label" for="chartType">Chart:</label>
+          <select id="chartType" class="chart-select" aria-label="Chart type">
+            <option value="bar" selected>Bar</option>
+            <option value="horizontalBar">Horizontal Bar</option>
+            <option value="line">Line</option>
+            <option value="doughnut">Doughnut</option>
+            <option value="pie">Pie</option>
+            <option value="polarArea">Polar Area</option>
+          </select>
+          <label class="chart-toolbar-label" for="chartMetric">Metric:</label>
+          <select id="chartMetric" class="chart-select" aria-label="Chart metric">
+            <option value="all" selected>All (System / Physical / Variance)</option>
+            <option value="system">System Qty</option>
+            <option value="physical">Physical Qty</option>
+            <option value="variance">Variance (Abs)</option>
+          </select>
+        </div>
       </div>
       <div class="chart-card">
         <h4 style="font-weight: 600; font-size: 1rem;" id="chartTitle">Variance by Item</h4>
@@ -180,8 +182,8 @@
 
     <!-- Item-Wise Cycle Count Table -->
     <section class="dashboard-section">
-      <h3 class="section-title">Item-Wise Cycle Count & Variance Summary</h3>
-      <div class="table-card">
+      <div class="section-header">
+        <h3 class="section-title">Item-Wise Cycle Count & Variance Summary</h3>
         <div class="chart-toolbar">
           <label class="chart-toolbar-label" for="filterStatus">Filter by</label>
           <select id="filterStatus" class="chart-select">
@@ -199,6 +201,8 @@
           <span class="chart-toolbar-sep"></span>
           <span id="filterCount" class="chart-toolbar-label" style="text-transform: none;">Showing all</span>
         </div>
+      </div>
+      <div class="table-card">
         <div class="table-responsive">
           <table class="data-table" id="inventoryTable">
             <thead>
@@ -228,7 +232,9 @@
 
       <!-- Operational Variance & Root Cause Analysis -->
       <section class="dashboard-section">
-        <h3 class="section-title">Operational Variance & Root Cause Analysis</h3>
+        <div class="section-header">
+          <h3 class="section-title">Operational Variance & Root Cause Analysis</h3>
+        </div>
         <div class="info-card">
           <div class="info-list" id="rootCauseList">
             <!-- Dynamically populated -->
@@ -238,7 +244,9 @@
 
       <!-- Action Items & Strategic Recommendations -->
       <section class="dashboard-section">
-        <h3 class="section-title">Action Items & Strategic Recommendations</h3>
+        <div class="section-header">
+          <h3 class="section-title">Action Items & Strategic Recommendations</h3>
+        </div>
         <div class="info-card">
           <div class="info-list" id="recommendationsList">
             <!-- Dynamically populated -->

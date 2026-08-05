@@ -147,29 +147,31 @@
 
       <!-- Charts Visualization -->
       <section class="dashboard-section">
-        <h3 class="section-title">Visual Analytics</h3>
-        <div class="chart-toolbar" role="group" aria-label="Chart controls">
-          <span class="chart-toolbar-label">View:</span>
-          <button id="filterByStore" class="btn btn-filter active" type="button">By Store</button>
-          <button id="filterByStatus" class="btn btn-filter" type="button">By Status</button>
-          <span class="chart-toolbar-sep" aria-hidden="true"></span>
-          <label class="chart-toolbar-label" for="chartType">Chart:</label>
-          <select id="chartType" class="chart-select" aria-label="Chart type">
-            <option value="bar" selected>Bar</option>
-            <option value="horizontalBar">Horizontal Bar</option>
-            <option value="stackedBar">Stacked Bar</option>
-            <option value="line">Line</option>
-            <option value="doughnut">Doughnut</option>
-            <option value="pie">Pie</option>
-            <option value="polarArea">Polar Area</option>
-          </select>
-          <label class="chart-toolbar-label" for="chartMetric">Metric:</label>
-          <select id="chartMetric" class="chart-select" aria-label="Chart metric">
-            <option value="all" selected>All (PO / Sent / Shortage)</option>
-            <option value="po">PO Qty</option>
-            <option value="sent">Sent Qty</option>
-            <option value="shortage">Shortage Qty</option>
-          </select>
+        <div class="section-header">
+          <h3 class="section-title">Visual Analytics</h3>
+          <div class="chart-toolbar" role="group" aria-label="Chart controls">
+            <span class="chart-toolbar-label">View:</span>
+            <button id="filterByStore" class="btn btn-filter active" type="button">By Store</button>
+            <button id="filterByStatus" class="btn btn-filter" type="button">By Status</button>
+            <span class="chart-toolbar-sep" aria-hidden="true"></span>
+            <label class="chart-toolbar-label" for="chartType">Chart:</label>
+            <select id="chartType" class="chart-select" aria-label="Chart type">
+              <option value="bar" selected>Bar</option>
+              <option value="horizontalBar">Horizontal Bar</option>
+              <option value="stackedBar">Stacked Bar</option>
+              <option value="line">Line</option>
+              <option value="doughnut">Doughnut</option>
+              <option value="pie">Pie</option>
+              <option value="polarArea">Polar Area</option>
+            </select>
+            <label class="chart-toolbar-label" for="chartMetric">Metric:</label>
+            <select id="chartMetric" class="chart-select" aria-label="Chart metric">
+              <option value="all" selected>All (PO / Sent / Shortage)</option>
+              <option value="po">PO Qty</option>
+              <option value="sent">Sent Qty</option>
+              <option value="shortage">Shortage Qty</option>
+            </select>
+          </div>
         </div>
         <div class="chart-card">
           <h4 style="font-weight: 600; font-size: 1rem;" id="chartTitle">Quantity Allocation by Store</h4>
@@ -181,7 +183,9 @@
 
       <!-- Store-Wise Table Summary -->
       <section class="dashboard-section">
-        <h3 class="section-title">Store-Wise Purchase Order & Dispatch Summary</h3>
+        <div class="section-header">
+          <h3 class="section-title">Store-Wise Purchase Order & Dispatch Summary</h3>
+        </div>
         <div class="table-card">
           <div class="table-responsive">
             <table class="data-table" id="storeTable">
@@ -211,17 +215,28 @@
 
       <!-- Photo Gallery -->
       <section class="dashboard-section">
-        <h3 class="section-title">Photo Gallery</h3>
-        <p style="color: var(--text-muted); margin: 0 0 12px;">Attach supporting documentation photos. Only <strong>.png</strong> and <strong>.jpeg / .jpg</strong> formats are accepted. Click any photo to view it full-screen.</p>
-        <div class="chart-toolbar" role="group" aria-label="Photo gallery tools">
-          <button id="addPhotoBtn" class="btn btn-primary" type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-            Upload Photo
-          </button>
-          <input type="file" id="photoFileInput" accept=".png,.jpeg,.jpg" multiple style="display: none;">
-          <span class="chart-toolbar-sep" aria-hidden="true"></span>
-          <span class="chart-toolbar-label" id="photoCountLabel">0 photo</span>
+        <div class="section-header">
+          <h3 class="section-title">Photo Gallery</h3>
+          <div class="chart-toolbar photo-toolbar" role="group" aria-label="Photo gallery tools">
+            <button id="addPhotoBtn" class="btn btn-primary" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              Upload Photo
+            </button>
+            <input type="file" id="photoFileInput" accept=".png,.jpeg,.jpg" multiple style="display: none;">
+            <button id="selectAllPhotosBtn" class="btn btn-secondary" type="button" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+              Select All
+            </button>
+            <button id="deleteSelectedPhotosBtn" class="btn btn-danger" type="button" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              Delete Selected
+            </button>
+            <span class="chart-toolbar-sep" aria-hidden="true"></span>
+            <span class="chart-toolbar-label" id="photoCountLabel">0 photo</span>
+            <span class="chart-toolbar-label" id="photoSelectionLabel" style="display:none;"></span>
+          </div>
         </div>
+        <p style="color: var(--text-muted); margin: 0 0 12px;">Attach supporting documentation photos. Only <strong>.png</strong> and <strong>.jpeg / .jpg</strong> formats are accepted. Click any photo to view it full-screen.</p>
         <div class="photo-grid" id="photoGrid">
           <!-- Dynamically filled via JavaScript -->
         </div>
@@ -229,22 +244,24 @@
 
       <!-- Shortage SKU-Wise Details -->
       <section class="dashboard-section">
-        <h3 class="section-title">Shortage SKU-Wise Details</h3>
-        <p style="color: var(--text-muted); margin: 0 0 12px;">SKU-level break-up of every store with a dispatch shortage. A store is marked <span style="color: var(--accent-red); font-weight: 600;">DETAILS PENDING</span> until its shortage is broken down here.</p>
-        <div class="chart-toolbar" role="group" aria-label="Shortage SKU tools">
-          <label class="chart-toolbar-label" for="skuStoreFilter">Store:</label>
-          <select id="skuStoreFilter" class="chart-select" aria-label="Filter shortage details by store">
-            <option value="all" selected>All Short Stores</option>
-          </select>
-          <span class="chart-toolbar-sep" aria-hidden="true"></span>
-          <button id="addSkuBtn" class="btn btn-primary" type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Add SKU Detail
-          </button>
-          <button id="importSkuBtn" class="btn btn-secondary" type="button">Import Shortage SKUs</button>
-          <button id="exportSkuBtn" class="btn btn-secondary" type="button">Export SKU Details</button>
-          <input type="file" id="skuFileInput" accept=".json,.csv,.xlsx" style="display: none;">
+        <div class="section-header">
+          <h3 class="section-title">Shortage SKU-Wise Details</h3>
+          <div class="chart-toolbar" role="group" aria-label="Shortage SKU tools">
+            <label class="chart-toolbar-label" for="skuStoreFilter">Store:</label>
+            <select id="skuStoreFilter" class="chart-select" aria-label="Filter shortage details by store">
+              <option value="all" selected>All Short Stores</option>
+            </select>
+            <span class="chart-toolbar-sep" aria-hidden="true"></span>
+            <button id="addSkuBtn" class="btn btn-primary" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add SKU Detail
+            </button>
+            <button id="importSkuBtn" class="btn btn-secondary" type="button">Import Shortage SKUs</button>
+            <button id="exportSkuBtn" class="btn btn-secondary" type="button">Export SKU Details</button>
+            <input type="file" id="skuFileInput" accept=".json,.csv,.xlsx" style="display: none;">
+          </div>
         </div>
+        <p style="color: var(--text-muted); margin: 0 0 12px;">SKU-level break-up of every store with a dispatch shortage. A store is marked <span style="color: var(--accent-red); font-weight: 600;">DETAILS PENDING</span> until its shortage is broken down here.</p>
         <div class="table-card">
           <div class="table-responsive">
             <table class="data-table" id="skuTable">
@@ -277,7 +294,9 @@
       
       <!-- Operational Shortage & Root Cause Analysis -->
       <section class="dashboard-section">
-        <h3 class="section-title">Operational Shortage & Root Cause Analysis</h3>
+        <div class="section-header">
+          <h3 class="section-title">Operational Shortage & Root Cause Analysis</h3>
+        </div>
         <div class="info-card">
           <div class="info-list" id="rootCauseList">
             <!-- Dynamically populated -->
@@ -287,7 +306,9 @@
 
       <!-- Action Items & Strategic Recommendations -->
       <section class="dashboard-section">
-        <h3 class="section-title">Action Items & Strategic Recommendations</h3>
+        <div class="section-header">
+          <h3 class="section-title">Action Items & Strategic Recommendations</h3>
+        </div>
         <div class="info-card">
           <div class="info-list" id="recommendationsList">
             <!-- Dynamically populated -->

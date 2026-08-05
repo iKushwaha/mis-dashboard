@@ -140,19 +140,21 @@
 
     <!-- Visual Analytics -->
     <section class="dashboard-section">
-      <h3 class="section-title">Visual Analytics</h3>
-      <div class="chart-toolbar" role="group" aria-label="Chart options">
-        <span class="chart-toolbar-label">Warehouse Chart:</span>
-        <span class="chart-toolbar-sep" aria-hidden="true"></span>
-        <label class="chart-toolbar-label" for="chartType">Chart:</label>
-        <select id="chartType" class="chart-select" aria-label="Chart type">
-          <option value="doughnut" selected>Doughnut</option>
-          <option value="pie">Pie</option>
-          <option value="polarArea">Polar Area</option>
-          <option value="bar">Bar</option>
-          <option value="horizontalBar">Horizontal Bar</option>
-          <option value="line">Line</option>
-        </select>
+      <div class="section-header">
+        <h3 class="section-title">Visual Analytics</h3>
+        <div class="chart-toolbar" role="group" aria-label="Chart options">
+          <span class="chart-toolbar-label">Warehouse Chart:</span>
+          <span class="chart-toolbar-sep" aria-hidden="true"></span>
+          <label class="chart-toolbar-label" for="chartType">Chart:</label>
+          <select id="chartType" class="chart-select" aria-label="Chart type">
+            <option value="doughnut" selected>Doughnut</option>
+            <option value="pie">Pie</option>
+            <option value="polarArea">Polar Area</option>
+            <option value="bar">Bar</option>
+            <option value="horizontalBar">Horizontal Bar</option>
+            <option value="line">Line</option>
+          </select>
+        </div>
       </div>
       <div class="chart-grid">
         <div class="chart-card chart-card-full">
@@ -195,7 +197,9 @@
 
     <!-- RTV Entries Table -->
     <section class="dashboard-section">
-      <h3 class="section-title">Return Entry Log & Processing Summary</h3>
+      <div class="section-header">
+        <h3 class="section-title">Return Entry Log & Processing Summary</h3>
+      </div>
       <div class="table-card">
         <div class="table-responsive">
           <table class="data-table" id="rtvTable">
@@ -225,7 +229,9 @@
 
       <!-- Return Processing & Root Cause Analysis -->
       <section class="dashboard-section">
-        <h3 class="section-title">Return Processing & Root Cause Analysis</h3>
+        <div class="section-header">
+          <h3 class="section-title">Return Processing & Root Cause Analysis</h3>
+        </div>
         <div class="info-card">
           <div class="info-list" id="rootCauseList">
             <!-- Dynamically populated -->
@@ -235,7 +241,9 @@
 
       <!-- Action Items & Strategic Recommendations -->
       <section class="dashboard-section">
-        <h3 class="section-title">Action Items & Strategic Recommendations</h3>
+        <div class="section-header">
+          <h3 class="section-title">Action Items & Strategic Recommendations</h3>
+        </div>
         <div class="info-card">
           <div class="info-list" id="recommendationsList">
             <!-- Dynamically populated -->

@@ -718,6 +718,22 @@ html, body {
   margin-bottom: 12px;
 }
 
+.photo-toolbar {
+  justify-content: flex-end;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.section-header .chart-toolbar {
+  margin-bottom: 0;
+}
+
 .chart-toolbar-label {
   font-size: 0.85rem;
   font-weight: 600;
@@ -1492,6 +1508,41 @@ dialog.dialog-import-preview {
   color: #ecfdf5;
   border: 1px solid rgba(255, 255, 255, 0.18);
   cursor: pointer;
+}
+
+.photo-check {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  cursor: pointer;
+  accent-color: var(--accent-green);
+  z-index: 2;
+  opacity: 0.85;
+}
+
+.photo-card.is-selected {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.35);
+}
+
+.photo-card.is-selected .photo-thumb {
+  filter: brightness(0.85);
+}
+
+.photo-card .photo-check:focus-visible {
+  outline: 2px solid var(--accent-green);
+  outline-offset: 1px;
+}
+
+/* ===== Photo Gallery Toolbar Buttons ===== */
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .photo-card .btn-icon:hover {

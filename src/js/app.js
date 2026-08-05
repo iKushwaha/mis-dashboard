@@ -85,7 +85,8 @@ let state = {
   skuSortKey: "sku",
   skuSortDir: "asc",
   photos: [],
-  lightboxIndex: 0
+  lightboxIndex: 0,
+  selectedPhotoIds: []
 };
 
 // Photo gallery storage key (separate from store data)
@@ -275,18 +276,35 @@ function escapeHtml(value) {
 function renderPhotoGallery() {
   const grid = document.getElementById("photoGrid");
   const countLabel = document.getElementById("photoCountLabel");
+  const selectionLabel = document.getElementById("photoSelectionLabel");
+  const selectAllBtn = document.getElementById("selectAllPhotosBtn");
+  const deleteSelectedBtn = document.getElementById("deleteSelectedPhotosBtn");
   const count = state.photos.length;
+  const selectedCount = state.selectedPhotoIds.length;
+  const allSelected = count > 0 && selectedCount === count;
+
   countLabel.innerText = `${count} photo${count !== 1 ? "s" : ""}`;
+  selectAllBtn.disabled = count === 0;
+  selectAllBtn.innerHTML = allSelected
+    ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"></path><path d="M21 12A9 9 0 1 0 6 5.3L3 8"></path><polyline points="12 7 12 12 15 15"></polyline></svg>
+      Clear Selection`
+    : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+      Select All`;
+  deleteSelectedBtn.disabled = selectedCount === 0;
+  deleteSelectedBtn.textContent = `Delete Selected (${selectedCount})`;
+  selectionLabel.style.display = selectedCount > 0 ? "inline" : "none";
+  selectionLabel.textContent = `${selectedCount} selected`;
 
   grid.innerHTML = "";
   if (count === 0) {
+    state.selectedPhotoIds = [];
     grid.innerHTML = `<div class="photo-empty">No photos uploaded yet. Click "Upload Photo" to attach .png or .jpeg documentation photos.</div>`;
     return;
   }
 
   state.photos.forEach((photo, index) => {
     const card = document.createElement("div");
-    card.className = "photo-card";
+    card.className = "photo-card" + (state.selectedPhotoIds.includes(photo.id) ? " is-selected" : "");
 
     const addedDate = photo.addedAt ? new Date(photo.addedAt).toLocaleDateString() : "";
 
@@ -297,6 +315,20 @@ function renderPhotoGallery() {
     img.loading = "lazy";
     img.title = "Click to view full-screen";
     img.addEventListener("click", () => openLightbox(index));
+
+    const check = document.createElement("input");
+    check.type = "checkbox";
+    check.className = "photo-check";
+    check.title = "Select for batch delete";
+    check.checked = state.selectedPhotoIds.includes(photo.id);
+    check.addEventListener("change", () => {
+      if (check.checked) {
+        if (!state.selectedPhotoIds.includes(photo.id)) state.selectedPhotoIds.push(photo.id);
+      } else {
+        state.selectedPhotoIds = state.selectedPhotoIds.filter(id => id !== photo.id);
+      }
+      renderPhotoGallery();
+    });
 
     const overlay = document.createElement("div");
     overlay.className = "photo-overlay";
@@ -322,6 +354,7 @@ function renderPhotoGallery() {
     meta.title = photo.name;
     meta.textContent = addedDate ? `${photo.name} · ${addedDate}` : photo.name;
 
+    card.appendChild(check);
     card.appendChild(img);
     card.appendChild(overlay);
     card.appendChild(meta);
@@ -334,6 +367,22 @@ function deletePhoto(id) {
   if (idx === -1) return;
   if (!confirm("Delete this photo from the gallery?")) return;
   state.photos.splice(idx, 1);
+  state.selectedPhotoIds = state.selectedPhotoIds.filter(pid => pid !== id);
+  if (state.lightboxIndex >= state.photos.length) {
+    state.lightboxIndex = Math.max(0, state.photos.length - 1);
+  }
+  savePhotos();
+  renderPhotoGallery();
+  updateLightbox();
+}
+
+function deleteSelectedPhotos() {
+  const count = state.selectedPhotoIds.length;
+  if (count === 0) return;
+  if (!confirm(`Delete ${count} selected photo${count !== 1 ? "s" : ""} from the gallery? This cannot be undone.`)) return;
+  const ids = new Set(state.selectedPhotoIds);
+  state.photos = state.photos.filter(p => !ids.has(p.id));
+  state.selectedPhotoIds = [];
   if (state.lightboxIndex >= state.photos.length) {
     state.lightboxIndex = Math.max(0, state.photos.length - 1);
   }
@@ -637,6 +686,7 @@ function setupEventListeners() {
     if (confirm("Erase all store dispatch data and gallery photos? This cannot be undone.")) {
       state.stores = [];
       state.photos = [];
+      state.selectedPhotoIds = [];
       localStorage.removeItem(PHOTO_STORAGE_KEY);
       saveState();
       renderDashboard();
@@ -733,9 +783,23 @@ function setupEventListeners() {
   // Photo Gallery controls
   const addPhotoBtn = document.getElementById("addPhotoBtn");
   const photoFileInput = document.getElementById("photoFileInput");
+  const selectAllPhotosBtn = document.getElementById("selectAllPhotosBtn");
+  const deleteSelectedPhotosBtn = document.getElementById("deleteSelectedPhotosBtn");
   const lightbox = document.getElementById("photoLightbox");
 
   addPhotoBtn.addEventListener("click", () => photoFileInput.click());
+
+  selectAllPhotosBtn.addEventListener("click", () => {
+    if (state.photos.length === 0) return;
+    const allSelected = state.selectedPhotoIds.length === state.photos.length;
+    state.selectedPhotoIds = allSelected ? [] : state.photos.map(p => p.id);
+    renderPhotoGallery();
+  });
+
+  deleteSelectedPhotosBtn.addEventListener("click", () => {
+    if (state.selectedPhotoIds.length === 0) return;
+    deleteSelectedPhotos();
+  });
 
   photoFileInput.addEventListener("change", (e) => {
     const files = Array.from(e.target.files || []);
