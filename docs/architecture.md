@@ -8,8 +8,9 @@ file server (`python3 -m http.server 8080`).
 
 | Page | Report | Logic | Storage key |
 | --- | --- | --- | --- |
-| `home.html` | All Reports overview | `src/js/home.js` | reads all three keys |
-| `index.html` | Store Dispatch | `src/js/app.js` | `warehouse_dashboard_stores_v2` |
+| `index.html` | Dashboard Overview / All Reports (landing) | `src/js/home.js` | reads all keys |
+| `daily-work.html` | Daily Work Report | `src/js/daily-work.js` | reads all keys + `daily_work_entries_v1` |
+| `store-dispatch.html` | Store Dispatch | `src/js/app.js` | `warehouse_dashboard_stores_v2` |
 | `inventory.html` | Inventory Cycle Count | `src/js/inventory.js` | `inventory_cycle_count_stores_v3` |
 | `rtv.html` | RTV | `src/js/rtv.js` | `rtv_entries_v1` |
 
@@ -20,7 +21,7 @@ All four pages stay siblings at the root so their relative links to each other
 
 ```
 .
-├── home.html / index.html / inventory.html / rtv.html   # entry pages
+├── index.html / daily-work.html / store-dispatch.html / inventory.html / rtv.html   # entry pages
 ├── src/
 │   ├── css/index.css       # shared styles + dark/light themes + responsive
 │   ├── js/                 # per-report logic + shared engine
@@ -44,7 +45,13 @@ All four pages stay siblings at the root so their relative links to each other
   and multiple chart renderings.
 - **`src/js/rtv.js`** - RTV. Owns `DEFAULT_ENTRIES`, state, CRUD, and channel /
   warehouse / status analytics.
-- **`src/js/home.js`** - Overview. Reads all three report keys, computes headline
+- **`src/js/daily-work.js`** - Daily Work Report. Aggregates work from all three
+  source reports (Store Dispatch, Inventory, RTV) plus manual entries in
+  `daily_work_entries_v1`, derives status per source, and renders KPIs, an
+  interactive chart (by report / status / assignee), a filterable work log,
+  team-productivity breakdowns, and recommendations. Re-syncs live via the
+  `storage` event so new submissions elsewhere reflect immediately.
+- **`src/js/home.js`** - Overview. Reads all report keys, computes headline
   KPIs, and populates the report cards and summary tiles.
 - **`src/css/index.css`** - Single shared stylesheet. Google Fonts via `@import`,
   CSS custom properties for the dark/light themes, and responsive grid layouts.
@@ -64,7 +71,7 @@ All four pages stay siblings at the root so their relative links to each other
 
 ```bash
 ./scripts/serve.sh          # -> python3 -m http.server 8080
-# open http://localhost:8080/home.html
+# open http://localhost:8080/  (Dashboard Overview landing page)
 ```
 
 See `docs/data-model.md` for the storage schemas.

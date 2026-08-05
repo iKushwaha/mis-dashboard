@@ -8,6 +8,7 @@ or database. Keys must never be renamed - existing users' data depends on them.
 | `warehouse_dashboard_stores_v2` | `src/js/app.js` | Store Dispatch records |
 | `inventory_cycle_count_stores_v3` | `src/js/inventory.js` | Cycle Count records |
 | `rtv_entries_v1` | `src/js/rtv.js` | RTV return entries |
+| `daily_work_entries_v1` | `src/js/daily-work.js` | Manual Daily Work entries |
 | `warehouse_dashboard_theme` | all pages | Shared `dark` / `light` theme |
 
 When a key is absent or unparseable, the page seeds defaults from the
@@ -72,6 +73,33 @@ Array of records:
 
 Derived per record: `variance = systemQty - physicalQty`; a record matches when
 `variance === 0`.
+
+## Daily Work (`daily_work_entries_v1`)
+
+Array of *manual* work entries (work submitted in the other three reports is
+never stored here - it is aggregated live from their keys at render time):
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id` | string | Unique, e.g. `work-...` |
+| `workType` | string | e.g. `Dispatch`, `Cycle Count`, `Return Processing`, `Quality Check` |
+| `task` | string | Task / activity description |
+| `assignee` | string | Person responsible |
+| `date` | string | Work date, `YYYY-MM-DD` |
+| `qty` | number | Units handled |
+| `status` | string enum | `COMPLETED` / `IN PROGRESS` / `PENDING` |
+| `notes` | string | Free text |
+
+The Daily Work Report (`daily-work.html`) combines these manual entries with
+live-derive work items from the three source reports:
+
+- Each **Store Dispatch** record -> a `Dispatch` task (status from dispatch status).
+- Each **Inventory Cycle Count** record -> a `Cycle Count` task (status from variance).
+- Each **RTV** record -> a `Return Processing` task (status from unboxing/video/booking).
+
+Synced items are marked `SYNCED` in the log and cannot be edited/deleted there;
+update them in their owning report and they re-sync automatically (the page also
+listens for `storage` events so edits in other tabs refresh it live).
 
 ## RTV Entries (`rtv_entries_v1`)
 

@@ -112,6 +112,14 @@
       fill("sumReturned", "-");
     }
 
+    // ---- Daily Work Report ----
+    const manualWork = read("daily_work_entries_v1") || [];
+    const totalWork = (stores ? stores.length : 0) + (items ? items.length : 0) + (entries ? entries.length : 0) + manualWork.length;
+    const unitsHandled = (stores ? stores.reduce((a, s) => a + (s.sentQty || 0), 0) : 0) +
+      (items ? items.reduce((a, s) => a + (s.physicalQty || 0), 0) : 0) +
+      (entries ? entries.reduce((a, e) => a + (e.receivedQty || 0), 0) : 0);
+    fill("metaDaily", `${totalWork} work items · ${fmtInt(unitsHandled)} units handled`);
+
     // Footer date
     const footerDate = document.getElementById("footerDate");
     if (footerDate) {

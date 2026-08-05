@@ -144,6 +144,8 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+  margin-right: auto;
 }
 
 .brand-logo {
@@ -169,6 +171,8 @@ html, body {
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  margin-left: auto;
+  justify-content: flex-end;
 }
 
 /* Report Switcher Select */
@@ -1017,9 +1021,28 @@ dialog.dialog-import-preview {
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-lg);
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: center;
+  gap: 28px;
+}
+
+.hero-intro {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+  align-items: flex-end;
+  text-align: right;
 }
 
 .hero::after {
@@ -1045,6 +1068,16 @@ dialog.dialog-import-preview {
   color: #c9dccf;
   font-size: 1.05rem;
   max-width: 620px;
+}
+
+@media (max-width: 860px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+  .hero-copy {
+    align-items: flex-start;
+    text-align: left;
+  }
 }
 
 .hero-stats {
@@ -1243,10 +1276,14 @@ dialog.dialog-import-preview {
 
   .control-group {
     width: 100%;
+    margin-left: 0;
   }
   .report-switcher {
     flex: 1 1 100%;
     min-width: 0;
+  }
+  .control-bar h1 {
+    margin-right: 0;
   }
 
   .recommendation-row {
@@ -1291,6 +1328,9 @@ dialog.dialog-import-preview {
     flex: 1 1 auto;
     justify-content: center;
     padding: 8px 10px;
+  }
+  .control-group {
+    gap: 8px;
   }
 
   .report-header {

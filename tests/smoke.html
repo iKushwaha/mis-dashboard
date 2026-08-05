@@ -18,8 +18,9 @@
   <h1>Smoke Test</h1>
   <p>Each link must open without 404s or console errors:</p>
   <ul>
-    <li><a href="home.html">All Reports</a> (home.html)</li>
-    <li><a href="index.html">Store Dispatch</a> (index.html)</li>
+    <li><a href="index.html">Dashboard Overview</a> (index.html)</li>
+    <li><a href="daily-work.html">Daily Work Report</a> (daily-work.html)</li>
+    <li><a href="store-dispatch.html">Store Dispatch</a> (store-dispatch.html)</li>
     <li><a href="inventory.html">Inventory Cycle Count</a> (inventory.html)</li>
     <li><a href="rtv.html">RTV</a> (rtv.html)</li>
     <li><a href="src/css/index.css">Stylesheet</a> (src/css/index.css)</li>
@@ -28,10 +29,10 @@
   <p id="result"></p>
   <script>
     const checks = [
-      "home.html", "index.html", "inventory.html", "rtv.html",
+      "index.html", "daily-work.html", "store-dispatch.html", "inventory.html", "rtv.html",
       "src/css/index.css", "src/assets/ugaoo-logo.png",
       "src/js/home.js", "src/js/app.js", "src/js/inventory.js",
-      "src/js/rtv.js", "src/js/data-import.js"
+      "src/js/rtv.js", "src/js/daily-work.js", "src/js/data-import.js"
     ];
     const result = document.getElementById("result");
     Promise.all(checks.map((url) =>

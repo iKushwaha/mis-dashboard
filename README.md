@@ -1,11 +1,12 @@
 # MIS Dashboard
 
-A client-side MIS (Management Information System) reporting suite for supply-chain & warehouse operations, consisting of three linked dashboards plus an overview landing page:
+A client-side MIS (Management Information System) reporting suite for supply-chain & warehouse operations, consisting of three linked dashboards plus an overview landing page and a daily work report:
 
-1. **All Reports Overview** (`home.html`) — attractive landing dashboard with live summary KPIs
-2. **Store Dispatch Report** (`index.html`)
-3. **Inventory Cycle Count Report** (`inventory.html`)
-4. **Return to Vendor / Origin (RTV) Report** (`rtv.html`)
+1. **Dashboard Overview – All Reports** (`index.html`) — the landing page with live summary KPIs and report cards
+2. **Daily Work Report** (`daily-work.html`) — auto-synced daily operations log
+3. **Store Dispatch Report** (`store-dispatch.html`)
+4. **Inventory Cycle Count Report** (`inventory.html`)
+5. **Return to Vendor / Origin (RTV) Report** (`rtv.html`)
 
 Each dashboard is a self-contained single-page app built with vanilla HTML/CSS/JavaScript. All data lives in the browser (LocalStorage); no backend or database is required.
 
@@ -13,7 +14,8 @@ Each dashboard is a self-contained single-page app built with vanilla HTML/CSS/J
 
 | Report | Table | Key Metrics | Charts |
 | --- | --- | --- | --- |
-| All Reports (`home.html`) | Report cards + summary tiles | Dispatch Efficiency, Total Shortage, Inventory Accuracy, Items Counted, RTV Completion Score, Qty Returned | — |
+| All Reports (`index.html`) | Report cards + summary tiles | Dispatch Efficiency, Total Shortage, Inventory Accuracy, Items Counted, RTV Completion Score, Qty Returned | — |
+| Daily Work Report (`daily-work.html`) | Daily Work Log | Total Work Items, Completed, In Progress, Pending, Completion Rate, Units Handled | Work by report / status / assignee (bar, line, doughnut, pie, polar area) |
 | Store Dispatch | Store-Wise Purchase Order & Dispatch Summary | Total PO Qty, Total Sent Qty, Total Shortage, Dispatch Efficiency | PO vs Sent vs Shortage by store |
 | Inventory Cycle Count | Item-Wise Cycle Count & Variance Summary | Items Counted, System Qty, Physical Qty, Total Variance (SKU count), Accuracy / Match Rate | Variance by item / by category (bar, line, doughnut, pie, polar area) |
 | RTV | Return Entry Log & Processing Summary | Total Qty Returned, Top Location, Completion Score, Entries Processed | Warehouse % of total volume, channel volume, unboxing / video / booking status |
@@ -42,6 +44,7 @@ All data persists in the browser's LocalStorage:
 
 | Dashboard | Storage key |
 | --- | --- |
+| Daily Work Report (manual entries) | `daily_work_entries_v1` |
 | Store Dispatch | `warehouse_dashboard_stores_v2` |
 | Inventory Cycle Count | `inventory_cycle_count_stores_v3` |
 | RTV | `rtv_entries_v1` |
@@ -64,26 +67,29 @@ No installation or build step is required. Serve the directory over any static f
 
 Then open:
 
-- http://localhost:8080/home.html – All Reports Overview
-- http://localhost:8080/index.html – Store Dispatch Report
+- http://localhost:8080/ – Dashboard Overview (landing page)
+- http://localhost:8080/daily-work.html – Daily Work Report
+- http://localhost:8080/store-dispatch.html – Store Dispatch Report
 - http://localhost:8080/inventory.html – Inventory Cycle Count Report
 - http://localhost:8080/rtv.html – RTV Report
 
-Use the **report switcher** in the header toolbar (on every page) to jump between All Reports, Store Dispatch, Inventory Cycle Count, and RTV.
+Use the **report switcher** in the header toolbar (on every page) to jump between Dashboard Overview, Daily Work Report, Store Dispatch, Inventory Cycle Count, and RTV.
 
 ## Project Structure
 
 ```
 .
-├── home.html         # All Reports overview / landing page
-├── index.html        # Store Dispatch Report
-├── inventory.html    # Inventory Cycle Count Report
-├── rtv.html          # Return to Vendor/Origin Report
+├── index.html            # Dashboard Overview (landing page)
+├── daily-work.html       # Daily Work Report
+├── store-dispatch.html   # Store Dispatch Report
+├── inventory.html        # Inventory Cycle Count Report
+├── rtv.html              # Return to Vendor/Origin Report
 ├── src/
 │   ├── css/
 │   │   └── index.css         # Shared styles (themes, layouts, components)
 │   ├── js/
 │   │   ├── home.js           # Overview logic (live summary KPIs, theme)
+│   │   ├── daily-work.js     # Daily Work Report logic (aggregates all reports + manual entries)
 │   │   ├── app.js            # Store Dispatch logic
 │   │   ├── inventory.js      # Cycle Count logic
 │   │   ├── rtv.js            # RTV logic

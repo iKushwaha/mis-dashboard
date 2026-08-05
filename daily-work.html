@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ugaoo | Daily Work Report</title>
+
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="src/css/index.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SheetJS CDN (CSV/XLSX parsing) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- Controls Bar -->
+    <div class="control-bar">
+      <h1>
+        <span class="brand-logo" aria-hidden="true"><img src="src/assets/ugaoo-logo.png" alt="Ugaoo logo"></span>
+      </h1>
+      <div class="control-group">
+        <select id="reportSwitcher" class="report-switcher" title="Switch Report" aria-label="Switch between reports" onchange="location.href=this.value">
+          <option value="index.html">Dashboard Overview - All Reports</option>
+          <option value="daily-work.html" selected>Daily Work Report</option>
+          <option value="store-dispatch.html">Store Dispatch Report</option>
+          <option value="inventory.html">Inventory Cycle Count Report</option>
+          <option value="rtv.html">Return to Vendor/Origin Report</option>
+        </select>
+        <button id="themeToggle" class="btn btn-secondary btn-icon" title="Toggle Theme" aria-label="Toggle dark/light theme">
+          <!-- Sun/Moon icon toggle handled in JS -->
+          <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+        </button>
+        <button id="refreshBtn" class="btn btn-secondary" title="Re-sync work from all reports">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
+            <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path>
+          </svg>
+          Refresh
+        </button>
+        <button id="addWorkBtn" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Work Entry
+        </button>
+        <button id="importBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Import Data
+        </button>
+        <input type="file" id="fileInput" accept=".json,.csv,.xlsx" style="display: none;">
+
+        <button id="exportJsonBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export JSON
+        </button>
+        <button id="exportCsvBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          Export CSV
+        </button>
+        <button id="printBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          Print / PDF
+        </button>
+        <button id="resetBtn" class="btn btn-danger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          Reset Data
+        </button>
+      </div>
+    </div>
+
+    <!-- Report Header Block -->
+    <header class="report-header">
+      <div class="header-left">
+        <span class="header-badge">Warehouse Operations & Workforce Log</span>
+        <h2 id="reportTitle">DAILY WORK REPORT</h2>
+        <p>Every dispatch, cycle count, and return-processing task executed today &mdash; auto-synced from all report submissions, plus manual work entries</p>
+      </div>
+      <div class="header-right">
+        <div class="header-meta-item">
+          <span class="header-meta-label">Work Date</span>
+          <span class="header-meta-value" id="headerWorkDate">-</span>
+        </div>
+        <div class="header-meta-item">
+          <span class="header-meta-label">Reported By</span>
+          <span class="header-meta-value" id="headerReportedBy">Pushpendra</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- KPI Cards Row -->
+    <section class="kpi-container" aria-label="Key Performance Indicators">
+
+      <!-- Total Work Items -->
+      <article class="kpi-card variant-blue" id="kpiTotalWork">
+        <span class="kpi-label">Total Work Items</span>
+        <span class="kpi-value" id="valTotalWork">0</span>
+        <span class="kpi-subtext" id="subTotalWork">Across all reports</span>
+      </article>
+
+      <!-- Completed -->
+      <article class="kpi-card variant-green" id="kpiCompleted">
+        <span class="kpi-label">Completed</span>
+        <span class="kpi-value" id="valCompleted">0</span>
+        <span class="kpi-subtext" id="subCompleted">Tasks done</span>
+      </article>
+
+      <!-- In Progress -->
+      <article class="kpi-card variant-indigo" id="kpiInProgress">
+        <span class="kpi-label">In Progress</span>
+        <span class="kpi-value" id="valInProgress">0</span>
+        <span class="kpi-subtext" id="subInProgress">Being worked on</span>
+      </article>
+
+      <!-- Pending -->
+      <article class="kpi-card variant-red" id="kpiPending">
+        <span class="kpi-label">Pending</span>
+        <span class="kpi-value" id="valPending">0</span>
+        <span class="kpi-subtext" id="subPending">Awaiting action</span>
+      </article>
+
+      <!-- Completion Rate -->
+      <article class="kpi-card variant-green" id="kpiCompletionRate">
+        <span class="kpi-label">Completion Rate</span>
+        <span class="kpi-value" id="valCompletionRate">0.00%</span>
+        <span class="kpi-subtext" id="subCompletionRate">% of work closed</span>
+      </article>
+
+    </section>
+
+    <!-- Charts Visualization -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h3 class="section-title">Visual Analytics</h3>
+        <div class="chart-toolbar" role="group" aria-label="Chart controls">
+          <span class="chart-toolbar-label">View:</span>
+          <button id="filterByReport" class="btn btn-filter active" type="button">By Report</button>
+          <button id="filterByStatus" class="btn btn-filter" type="button">By Status</button>
+          <button id="filterByAssignee" class="btn btn-filter" type="button">By Assignee</button>
+          <span class="chart-toolbar-sep" aria-hidden="true"></span>
+          <label class="chart-toolbar-label" for="chartType">Chart:</label>
+          <select id="chartType" class="chart-select" aria-label="Chart type">
+            <option value="bar" selected>Bar</option>
+            <option value="horizontalBar">Horizontal Bar</option>
+            <option value="stackedBar">Stacked Bar</option>
+            <option value="line">Line</option>
+            <option value="doughnut">Doughnut</option>
+            <option value="pie">Pie</option>
+            <option value="polarArea">Polar Area</option>
+          </select>
+          <label class="chart-toolbar-label" for="chartMetric">Metric:</label>
+          <select id="chartMetric" class="chart-select" aria-label="Chart metric">
+            <option value="count" selected>Work Count</option>
+            <option value="qty">Units Handled</option>
+          </select>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h4 style="font-weight: 600; font-size: 1rem;" id="chartTitle">Work Distribution by Report</h4>
+        <div class="chart-container">
+          <canvas id="workChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Daily Work Log -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h3 class="section-title">Daily Work Log</h3>
+        <div class="chart-toolbar" role="group" aria-label="Work log filters">
+          <label class="chart-toolbar-label" for="workReportFilter">Report:</label>
+          <select id="workReportFilter" class="chart-select" aria-label="Filter by report">
+            <option value="all" selected>All Reports</option>
+            <option value="STORE DISPATCH">Store Dispatch</option>
+            <option value="INVENTORY">Inventory</option>
+            <option value="RTV">RTV</option>
+            <option value="MANUAL">Manual Entry</option>
+          </select>
+          <label class="chart-toolbar-label" for="workStatusFilter">Status:</label>
+          <select id="workStatusFilter" class="chart-select" aria-label="Filter by status">
+            <option value="all" selected>All Statuses</option>
+            <option value="COMPLETED">COMPLETED</option>
+            <option value="IN PROGRESS">IN PROGRESS</option>
+            <option value="PENDING">PENDING</option>
+          </select>
+          <label class="chart-toolbar-label" for="workAssigneeFilter">Assignee:</label>
+          <select id="workAssigneeFilter" class="chart-select" aria-label="Filter by assignee">
+            <option value="all" selected>All Assignees</option>
+          </select>
+          <input type="search" id="workSearch" class="chart-select" placeholder="Search task..." aria-label="Search work log" style="min-width: 170px;">
+          <span class="chart-toolbar-sep" aria-hidden="true"></span>
+          <span id="workCountLabel" class="chart-toolbar-label" style="text-transform: none;">0 items</span>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-responsive">
+          <table class="data-table" id="workTable">
+            <thead>
+              <tr>
+                <th class="sortable" data-sort="report"><button type="button" class="th-sort">Report<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="workType"><button type="button" class="th-sort">Work Type<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="task"><button type="button" class="th-sort">Task / Activity<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="assignee"><button type="button" class="th-sort">Assignee<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="date"><button type="button" class="th-sort">Date<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="qty"><button type="button" class="th-sort">Qty<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="status"><button type="button" class="th-sort">Status<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="source"><button type="button" class="th-sort">Source<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="notes"><button type="button" class="th-sort">Notes<span class="sort-arrow"></span></button></th>
+                <th class="table-actions-header">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="workTableBody">
+              <!-- Dynamically filled via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analysis Cards (Productivity and Recommendations) -->
+    <div class="analysis-container">
+
+      <!-- Work Distribution & Team Productivity -->
+      <section class="dashboard-section">
+        <div class="section-header">
+          <h3 class="section-title">Team Productivity & Work Distribution</h3>
+        </div>
+        <div class="info-card">
+          <div class="info-list" id="productivityList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Operational Insights & Recommendations -->
+      <section class="dashboard-section">
+        <div class="section-header">
+          <h3 class="section-title">Operational Insights & Recommendations</h3>
+        </div>
+        <div class="info-card">
+          <div class="info-list" id="recommendationsList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <span id="footerText">Supply Chain &amp; Warehouse Management | Daily Work Report</span>
+      <span>Page 1 of 1</span>
+    </footer>
+
+  </div>
+
+  <!-- Work Entry Add/Edit Dialog Modal -->
+  <dialog id="workDialog" closedby="any" aria-labelledby="workDialogTitle">
+    <div class="dialog-header">
+      <h3 class="dialog-title" id="workDialogTitle">Add Work Entry</h3>
+      <button class="dialog-close" id="closeWorkDialogBtn" aria-label="Close dialog">&times;</button>
+    </div>
+
+    <form id="workForm">
+      <input type="hidden" id="formWorkId">
+
+      <div class="form-group">
+        <label for="workType">Work Type</label>
+        <select id="workType" class="form-control" required>
+          <option value="Dispatch">Dispatch</option>
+          <option value="Cycle Count">Cycle Count</option>
+          <option value="Return Processing">Return Processing</option>
+          <option value="Quality Check">Quality Check</option>
+          <option value="Packing &amp; Labelling">Packing &amp; Labelling</option>
+          <option value="Putaway / Staging">Putaway / Staging</option>
+          <option value="Dispatch Documentation">Dispatch Documentation</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="workTask">Task / Activity</label>
+        <input type="text" id="workTask" class="form-control" placeholder="e.g. Dispatch to DLF Phase 1" required>
+      </div>
+
+      <div class="form-group">
+        <label for="workAssignee">Assignee</label>
+        <input type="text" id="workAssignee" class="form-control" placeholder="e.g. Pushpendra" required>
+      </div>
+
+      <div class="form-group">
+        <label for="workDate">Date</label>
+        <input type="date" id="workDate" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="workQty">Qty / Units Handled</label>
+        <input type="number" id="workQty" class="form-control" min="0" placeholder="0">
+      </div>
+
+      <div class="form-group">
+        <label for="workStatus">Status</label>
+        <select id="workStatus" class="form-control" required>
+          <option value="PENDING">PENDING</option>
+          <option value="IN PROGRESS">IN PROGRESS</option>
+          <option value="COMPLETED">COMPLETED</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="workNotes">Notes</label>
+        <input type="text" id="workNotes" class="form-control" placeholder="Optional notes">
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="cancelWorkDialogBtn" class="btn btn-secondary">Cancel</button>
+        <button type="submit" id="saveWorkDialogBtn" class="btn btn-primary">Save Entry</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- JavaScript Application -->
+  <script src="src/js/data-import.js"></script>
+  <script src="src/js/daily-work.js"></script>
+
+</body>
+</html>
