@@ -611,6 +611,12 @@ html, body {
   border: 1px solid rgba(245, 158, 11, 0.25);
 }
 
+.badge-blue {
+  background-color: var(--badge-blue);
+  color: var(--accent-blue);
+  border: 1px solid rgba(45, 212, 191, 0.25);
+}
+
 /* Action icons inside cells */
 .table-actions {
   display: flex;

@@ -218,7 +218,7 @@ function setupEventListeners() {
       status: ["Status", "status"],
       reasonOfShortage: ["Reason of Shortage", "Shortage Reason", "reasonOfShortage"]
     };
-    const STORE_STATUSES = ["DELIVERED", "SHORTAGE", "IN TRANSIT"];
+    const STORE_STATUSES = ["DELIVERED", "READY TO DISPATCH", "SHORTAGE", "IN TRANSIT"];
 
     await BulkImport.openImport({
       file,
@@ -607,7 +607,7 @@ function renderDashboard() {
       shortageClass = "has-shortage";
     }
 
-    const statusBadgeClass = s.status === "DELIVERED" ? "badge-green" : (s.status === "SHORTAGE" ? "badge-red" : "badge-orange");
+    const statusBadgeClass = s.status === "DELIVERED" ? "badge-green" : (s.status === "READY TO DISPATCH" ? "badge-blue" : (s.status === "SHORTAGE" ? "badge-red" : "badge-orange"));
 
     tr.innerHTML = `
       <td style="font-weight: 600;">${s.storeName}</td>
