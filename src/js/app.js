@@ -44,7 +44,10 @@ let state = {
   theme: "dark",
   editingId: null,
   sortKey: "storeName",
-  sortDir: "asc"
+  sortDir: "asc",
+  chartMode: "store",
+  chartType: "bar",
+  chartMetric: "all"
 };
 
 // SVG Icon Helpers
@@ -352,6 +355,36 @@ function setupEventListeners() {
       renderDashboard();
     });
   });
+
+  // Interactive Visual Analytics Controls
+  const chartTypeSelect = document.getElementById("chartType");
+  const chartMetricSelect = document.getElementById("chartMetric");
+  const filterByStoreBtn = document.getElementById("filterByStore");
+  const filterByStatusBtn = document.getElementById("filterByStatus");
+
+  chartTypeSelect.addEventListener("change", () => {
+    state.chartType = chartTypeSelect.value;
+    renderChart();
+    syncChartControls();
+  });
+
+  chartMetricSelect.addEventListener("change", () => {
+    state.chartMetric = chartMetricSelect.value;
+    renderChart();
+    syncChartControls();
+  });
+
+  filterByStoreBtn.addEventListener("click", () => {
+    state.chartMode = "store";
+    renderChart();
+    syncChartControls();
+  });
+
+  filterByStatusBtn.addEventListener("click", () => {
+    state.chartMode = "status";
+    renderChart();
+    syncChartControls();
+  });
 }
 
 function updateThemeIcon() {
@@ -368,9 +401,54 @@ function updateThemeIcon() {
 // Global reference for Chart.js instance
 let dispatchChartInstance = null;
 
+const STATUS_ORDER = ["DELIVERED", "READY TO DISPATCH", "IN TRANSIT", "SHORTAGE"];
+
+function getShortage(store) {
+  return Math.max(0, (store.poQty || 0) - (store.sentQty || 0));
+}
+
+function chartMetricLabel(metric) {
+  switch (metric) {
+    case "po": return "PO Qty";
+    case "sent": return "Sent Qty";
+    case "shortage": return "Shortage Qty";
+    case "count": return "Store Count";
+    default: return "Quantity Allocation";
+  }
+}
+
+function buildChartData() {
+  const mode = state.chartMode === "status" ? "status" : "store";
+  if (mode === "status") {
+    const map = {};
+    state.stores.forEach(s => {
+      const st = s.status || "UNKNOWN";
+      if (!map[st]) map[st] = { count: 0, po: 0, sent: 0 };
+      map[st].count += 1;
+      map[st].po += s.poQty || 0;
+      map[st].sent += s.sentQty || 0;
+    });
+    const labels = Object.keys(map).sort((a, b) => STATUS_ORDER.indexOf(a) - STATUS_ORDER.indexOf(b));
+    return {
+      labels,
+      count: labels.map(l => map[l].count),
+      po: labels.map(l => map[l].po),
+      sent: labels.map(l => map[l].sent),
+      shortage: labels.map(l => Math.max(0, map[l].po - map[l].sent))
+    };
+  }
+  return {
+    labels: state.stores.map(s => s.storeName),
+    count: state.stores.map(() => 1),
+    po: state.stores.map(s => s.poQty || 0),
+    sent: state.stores.map(s => s.sentQty || 0),
+    shortage: state.stores.map(s => getShortage(s))
+  };
+}
+
 function renderChart() {
   const ctx = document.getElementById("dispatchChart").getContext("2d");
-  
+
   if (dispatchChartInstance) {
     dispatchChartInstance.destroy();
   }
@@ -379,89 +457,160 @@ function renderChart() {
   const gridColor = isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(15, 23, 42, 0.08)";
   const textColor = isDark ? "#9ca3af" : "#475569";
 
-  const labels = state.stores.map(s => s.storeName);
-  const poData = state.stores.map(s => s.poQty);
-  const sentData = state.stores.map(s => s.sentQty);
-  const shortageData = state.stores.map(s => Math.max(0, s.poQty - s.sentQty));
+  const chartType = state.chartType || "bar";
+  const chartMetric = state.chartMetric || "all";
+  const data = buildChartData();
 
-  dispatchChartInstance = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: "PO Qty",
-          data: poData,
-          backgroundColor: isDark ? "rgba(45, 212, 191, 0.8)" : "rgba(13, 148, 136, 0.85)",
-          borderColor: "var(--accent-blue)",
-          borderWidth: 1,
-          borderRadius: 4
-        },
-        {
-          label: "Sent Qty",
-          data: sentData,
-          backgroundColor: isDark ? "rgba(34, 197, 94, 0.8)" : "rgba(5, 150, 105, 0.85)",
-          borderColor: "var(--accent-green)",
-          borderWidth: 1,
-          borderRadius: 4
-        },
-        {
-          label: "Shortage Qty",
-          data: shortageData,
-          backgroundColor: isDark ? "rgba(248, 113, 113, 0.8)" : "rgba(220, 38, 38, 0.85)",
-          borderColor: "var(--accent-red)",
-          borderWidth: 1,
-          borderRadius: 4
-        }
-      ]
+  const singleSeries = ["pie", "doughnut", "polarArea"].includes(chartType);
+  const effectiveMetric = chartMetric === "all" ? "sent" : chartMetric;
+
+  const colorMap = {
+    count: { dark: "rgba(163, 230, 53, 0.85)", light: "rgba(77, 124, 15, 0.85)", border: "var(--accent-indigo)" },
+    po: { dark: "rgba(45, 212, 191, 0.8)", light: "rgba(13, 148, 136, 0.85)", border: "var(--accent-blue)" },
+    sent: { dark: "rgba(34, 197, 94, 0.8)", light: "rgba(5, 150, 105, 0.85)", border: "var(--accent-green)" },
+    shortage: { dark: "rgba(248, 113, 113, 0.8)", light: "rgba(220, 38, 38, 0.85)", border: "var(--accent-red)" }
+  };
+
+  const palette = [
+    "#2dd4bf", "#22c55e", "#f87171", "#a3e635", "#fbbf24", "#60a5fa",
+    "#c084fc", "#fb923c", "#34d399", "#4ade80", "#facc15", "#38bdf8",
+    "#f472b6", "#a78bfa", "#fb7185"
+  ];
+
+  const metricData = { count: data.count, po: data.po, sent: data.sent, shortage: data.shortage };
+
+  let datasets;
+  if (singleSeries) {
+    datasets = [{
+      label: chartMetricLabel(effectiveMetric),
+      data: metricData[effectiveMetric],
+      backgroundColor: data.labels.map((_, i) => palette[i % palette.length]),
+      borderColor: "rgba(15, 23, 42, 0.35)",
+      borderWidth: 1
+    }];
+  } else if (chartMetric === "all") {
+    datasets = ["po", "sent", "shortage"].map((key) => {
+      const c = colorMap[key];
+      return {
+        label: chartMetricLabel(key),
+        data: metricData[key],
+        backgroundColor: isDark ? c.dark : c.light,
+        borderColor: c.border,
+        borderWidth: 1,
+        borderRadius: 4
+      };
+    });
+    if (state.chartMode === "status") {
+      datasets.unshift({
+        label: chartMetricLabel("count"),
+        data: metricData.count,
+        backgroundColor: isDark ? colorMap.count.dark : colorMap.count.light,
+        borderColor: colorMap.count.border,
+        borderWidth: 1,
+        borderRadius: 4
+      });
+    }
+  } else {
+    const c = colorMap[chartMetric];
+    datasets = [{
+      label: chartMetricLabel(chartMetric),
+      data: metricData[chartMetric],
+      backgroundColor: isDark ? c.dark : c.light,
+      borderColor: c.border,
+      borderWidth: 1,
+      borderRadius: 4
+    }];
+  }
+
+  const isHorizontal = chartType === "horizontalBar";
+  const isStacked = chartType === "stackedBar";
+  const isLine = chartType === "line";
+  const isCartesian = ["bar", "horizontalBar", "stackedBar", "line"].includes(chartType);
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: {
+      duration: 600,
+      easing: "easeOutQuart"
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: "top",
-          labels: {
-            color: textColor,
-            font: {
-              family: "Inter"
-            }
-          }
-        },
-        tooltip: {
-          backgroundColor: isDark ? "#1f2937" : "#ffffff",
-          titleColor: isDark ? "#ffffff" : "#0f172a",
-          bodyColor: isDark ? "#9ca3af" : "#475569",
-          borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
-          borderWidth: 1
+    indexAxis: isHorizontal ? "y" : "x",
+    cutout: chartType === "doughnut" ? "55%" : undefined,
+    plugins: {
+      legend: {
+        position: singleSeries ? "right" : "top",
+        labels: {
+          color: textColor,
+          font: { family: "Inter" },
+          boxWidth: 12,
+          padding: 16
         }
       },
-      scales: {
-        x: {
-          grid: {
-            display: false
-          },
-          ticks: {
-            color: textColor,
-            font: {
-              family: "Inter"
-            }
-          }
-        },
-        y: {
-          grid: {
-            color: gridColor
-          },
-          ticks: {
-            color: textColor,
-            font: {
-              family: "Inter"
-            }
-          }
-        }
+      tooltip: {
+        backgroundColor: isDark ? "#1f2937" : "#ffffff",
+        titleColor: isDark ? "#ffffff" : "#0f172a",
+        bodyColor: isDark ? "#9ca3af" : "#475569",
+        borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+        borderWidth: 1
       }
-    }
+    },
+    scales: isCartesian ? {
+      x: {
+        stacked: isStacked,
+        grid: { display: false },
+        ticks: {
+          color: textColor,
+          font: { family: "Inter" },
+          maxRotation: isHorizontal ? 0 : 60,
+          minRotation: isHorizontal ? 0 : 30,
+          autoSkip: true,
+          maxTicksLimit: 20
+        }
+      },
+      y: {
+        stacked: isStacked,
+        grid: { color: gridColor },
+        ticks: { color: textColor, font: { family: "Inter" } }
+      }
+    } : undefined
+  };
+
+  if (isLine) {
+    datasets.forEach(d => {
+      d.tension = 0.35;
+      d.borderWidth = 2;
+      d.pointRadius = 3;
+      d.fill = true;
+      d.backgroundColor = isDark ? "rgba(45, 212, 191, 0.12)" : "rgba(13, 148, 136, 0.12)";
+    });
+  }
+
+  dispatchChartInstance = new Chart(ctx, {
+    type: isHorizontal ? "bar" : (isStacked ? "bar" : chartType),
+    data: {
+      labels: data.labels,
+      datasets: datasets
+    },
+    options: options
   });
+}
+
+function syncChartControls() {
+  const typeSelect = document.getElementById("chartType");
+  const metricSelect = document.getElementById("chartMetric");
+  const storeBtn = document.getElementById("filterByStore");
+  const statusBtn = document.getElementById("filterByStatus");
+  if (typeSelect) typeSelect.value = state.chartType;
+  if (metricSelect) metricSelect.value = state.chartMetric;
+  if (storeBtn) storeBtn.classList.toggle("active", state.chartMode !== "status");
+  if (statusBtn) statusBtn.classList.toggle("active", state.chartMode === "status");
+
+  const title = document.getElementById("chartTitle");
+  if (title) {
+    const metricPart = chartMetricLabel(state.chartMetric);
+    const viewPart = state.chartMode === "status" ? "by Status" : "by Store";
+    title.textContent = `${metricPart} ${viewPart}`;
+  }
 }
 
 function updateChartTheme() {
@@ -658,6 +807,7 @@ function renderDashboard() {
 
   // 6. Draw Chart
   renderChart();
+  syncChartControls();
 }
 
 function renderRootCauseAnalysis(kpi) {

@@ -148,8 +148,31 @@
       <!-- Charts Visualization -->
       <section class="dashboard-section">
         <h3 class="section-title">Visual Analytics</h3>
+        <div class="chart-toolbar" role="group" aria-label="Chart controls">
+          <span class="chart-toolbar-label">View:</span>
+          <button id="filterByStore" class="btn btn-filter active" type="button">By Store</button>
+          <button id="filterByStatus" class="btn btn-filter" type="button">By Status</button>
+          <span class="chart-toolbar-sep" aria-hidden="true"></span>
+          <label class="chart-toolbar-label" for="chartType">Chart:</label>
+          <select id="chartType" class="chart-select" aria-label="Chart type">
+            <option value="bar" selected>Bar</option>
+            <option value="horizontalBar">Horizontal Bar</option>
+            <option value="stackedBar">Stacked Bar</option>
+            <option value="line">Line</option>
+            <option value="doughnut">Doughnut</option>
+            <option value="pie">Pie</option>
+            <option value="polarArea">Polar Area</option>
+          </select>
+          <label class="chart-toolbar-label" for="chartMetric">Metric:</label>
+          <select id="chartMetric" class="chart-select" aria-label="Chart metric">
+            <option value="all" selected>All (PO / Sent / Shortage)</option>
+            <option value="po">PO Qty</option>
+            <option value="sent">Sent Qty</option>
+            <option value="shortage">Shortage Qty</option>
+          </select>
+        </div>
         <div class="chart-card">
-          <h4 style="font-weight: 600; font-size: 1rem;">Quantity Allocation by Store</h4>
+          <h4 style="font-weight: 600; font-size: 1rem;" id="chartTitle">Quantity Allocation by Store</h4>
           <div class="chart-container">
             <canvas id="dispatchChart"></canvas>
           </div>
