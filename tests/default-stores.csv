@@ -1,0 +1,6 @@
+Store Name,PO Raised Date,Dispatched Date,No. of Item in PO,PO Qty,Sent Qty,Shortage Qty,Verified By,Status,Reason of Shortage
+"DLF Phase 1","29/07/2026","30/07/2026",115,473,473,0,"Pushpendra","DELIVERED","-"
+"Pacific Mall","29/07/2026","30/07/2026",71,609,598,11,"Pushpendra","DELIVERED","some Of The Item Block For Future Order"
+"Select Citywalk","28/07/2026","30/07/2026",210,1250,890,360,"Pushpendra","SHORTAGE","material not arranged as per Requested"
+"Ambience Mall","29/07/2026","30/07/2026",95,840,0,840,"Pushpendra","READY TO DISPATCH","pending clearance before dispatch"
+"V3S Mall","27/07/2026","30/07/2026",40,320,320,0,"Pushpendra","IN TRANSIT","-"

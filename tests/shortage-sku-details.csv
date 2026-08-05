@@ -1,0 +1,8 @@
+Store Name,SKU Code,Item Description,Category,No. of Qty. in PO,Sent Qty,Shortage Qty (Variance),Variance %,Status,Shortage Reason,Notes
+"Select Citywalk","SEED-AGER-100","Ageratum Flower Seeds","FLOWER SEED",500,300,200,40.00,"SHORTAGE","Material Not Arranged As Per Requested","Awaiting vendor stock"
+"Select Citywalk","SEED-COR-250","Coriander Seeds - 250 g","SEEDS",450,400,50,11.11,"PARTIAL","Vendor Supply Delay","-"
+"Select Citywalk","SEED-ALY-200","Alyssum (200 Seeds)","FLOWER SEED",300,190,110,36.67,"SHORTAGE","Material Not Arranged As Per Requested","-"
+"Ambience Mall","SEED-CHL-100","Green Chilli Seeds - 100 g","SEEDS",300,0,300,100.00,"NOT DISPATCHED","Pending Clearance Before Dispatch","Awaiting dispatch clearance"
+"Ambience Mall","SEED-ARG-200","Arugula Seeds (Rocket Cultivated)","HERB SEED",250,0,250,100.00,"NOT DISPATCHED","Pending Clearance Before Dispatch","-"
+"Ambience Mall","SEED-TUL-050","Tulsi Seeds","HERB SEED",290,0,290,100.00,"NOT DISPATCHED","Transport Capacity Constraint","Van capacity not confirmed"
+"Pacific Mall","SEED-BLSM-200","Balsam Mix (200 Seeds)","FLOWER SEED",100,89,11,11.00,"PARTIAL","Some Of The Item Block For Future Order","Blocked for future order"

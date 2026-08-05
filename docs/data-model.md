@@ -27,10 +27,31 @@ Array of records:
 | `sentQty` | number | Quantity dispatched |
 | `itemsInPo` | number | Number of line items in the PO |
 | `verifiedPerson` | string | Who verified the dispatch |
-| `status` | string enum | `DELIVERED` / `SHORTAGE` / `IN TRANSIT` |
-| `reasonOfShortage` | string | Root-cause note |
+| `status` | string enum | `DELIVERED` / `READY TO DISPATCH` / `SHORTAGE` / `IN TRANSIT` |
+| `reasonOfShortage` | string | Root-cause note (picked from the shortage reason dropdown) |
+| `shortageDetails` | array | SKU-wise shortage break-up (required whenever `poQty > sentQty`) |
 
 Derived per record: `shortage = poQty - sentQty`.
+
+### Shortage detail record (`store.shortageDetails[]`)
+
+Each entry documents a short SKU line for a store:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id` | string | Unique, e.g. `sku-...` |
+| `sku` | string | SKU code |
+| `itemDescription` | string | Item / product description |
+| `category` | string | Product category |
+| `poQty` | number | Quantity in PO |
+| `sentQty` | number | Quantity dispatched |
+| `status` | string enum | `FULFILLED` / `PARTIAL` / `SHORTAGE` / `NOT DISPATCHED` |
+| `shortageReason` | string | Reason from the shortage reason dropdown |
+| `notes` | string | Free text |
+
+Derived per detail: `variance = poQty - sentQty`, `variancePct = variance / poQty * 100`.
+
+A store with `poQty > sentQty` is flagged **DETAILS PENDING** in the report until at least one shortage detail is uploaded.
 
 ## Inventory Cycle Count (`inventory_cycle_count_stores_v3`)
 

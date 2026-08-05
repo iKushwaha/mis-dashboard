@@ -197,10 +197,56 @@
                   <th class="sortable" data-sort="verifiedPerson"><button type="button" class="th-sort">Verified By<span class="sort-arrow"></span></button></th>
                   <th class="sortable" data-sort="status"><button type="button" class="th-sort">Status<span class="sort-arrow"></span></button></th>
                   <th class="sortable" data-sort="reasonOfShortage"><button type="button" class="th-sort">Reason of Shortage<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="shortageDetails"><button type="button" class="th-sort">Shortage Details<span class="sort-arrow"></span></button></th>
                   <th class="table-actions-header">Actions</th>
                 </tr>
               </thead>
               <tbody id="storeTableBody">
+                <!-- Dynamically filled via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Shortage SKU-Wise Details -->
+      <section class="dashboard-section">
+        <h3 class="section-title">Shortage SKU-Wise Details</h3>
+        <p style="color: var(--text-muted); margin: 0 0 12px;">SKU-level break-up of every store with a dispatch shortage. A store is marked <span style="color: var(--accent-red); font-weight: 600;">DETAILS PENDING</span> until its shortage is broken down here.</p>
+        <div class="chart-toolbar" role="group" aria-label="Shortage SKU tools">
+          <label class="chart-toolbar-label" for="skuStoreFilter">Store:</label>
+          <select id="skuStoreFilter" class="chart-select" aria-label="Filter shortage details by store">
+            <option value="all" selected>All Short Stores</option>
+          </select>
+          <span class="chart-toolbar-sep" aria-hidden="true"></span>
+          <button id="addSkuBtn" class="btn btn-primary" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add SKU Detail
+          </button>
+          <button id="importSkuBtn" class="btn btn-secondary" type="button">Import Shortage SKUs</button>
+          <button id="exportSkuBtn" class="btn btn-secondary" type="button">Export SKU Details</button>
+          <input type="file" id="skuFileInput" accept=".json,.csv,.xlsx" style="display: none;">
+        </div>
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="skuTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort="storeName"><button type="button" class="th-sort">Store Name<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="sku"><button type="button" class="th-sort">SKU Code<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="itemDescription"><button type="button" class="th-sort">Item Description<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="category"><button type="button" class="th-sort">Category<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="poQty"><button type="button" class="th-sort">Qty. in PO<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="sentQty"><button type="button" class="th-sort">Sent Qty.<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="variance"><button type="button" class="th-sort">Shortage (Variance)<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="variancePct"><button type="button" class="th-sort">Variance %<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="status"><button type="button" class="th-sort">Status<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="shortageReason"><button type="button" class="th-sort">Shortage Reason<span class="sort-arrow"></span></button></th>
+                  <th class="sortable" data-sort="notes"><button type="button" class="th-sort">Notes<span class="sort-arrow"></span></button></th>
+                  <th class="table-actions-header">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="skuTableBody">
                 <!-- Dynamically filled via JavaScript -->
               </tbody>
             </table>
@@ -297,13 +343,83 @@
       </div>
 
       <div class="form-group">
-        <label for="reasonOfShortage">Reason of Shortage</label>
-        <input type="text" id="reasonOfShortage" class="form-control" placeholder="e.g. some Of The Item Block For Future Order">
+        <label for="shortageReason">Reason of Shortage</label>
+        <select id="shortageReason" class="form-control">
+          <option value="">-- Select Reason --</option>
+        </select>
+        <small id="shortageHint" style="display: none; color: var(--accent-red);">Shortage detected - SKU-wise shortage details are required in the Shortage SKU-Wise Details section.</small>
       </div>
 
       <div class="form-actions">
         <button type="button" id="cancelDialogBtn" class="btn btn-secondary">Cancel</button>
         <button type="submit" id="saveDialogBtn" class="btn btn-primary">Save Record</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- SKU Shortage Detail Add/Edit Dialog Modal -->
+  <dialog id="skuDialog" closedby="any" aria-labelledby="skuDialogTitle">
+    <div class="dialog-header">
+      <h3 class="dialog-title" id="skuDialogTitle">Add SKU Shortage Detail</h3>
+      <button class="dialog-close" id="closeSkuDialogBtn" aria-label="Close dialog">&times;</button>
+    </div>
+
+    <form id="skuForm">
+      <input type="hidden" id="formSkuId">
+
+      <div class="form-group">
+        <label for="skuStore">Store</label>
+        <select id="skuStore" class="form-control" required></select>
+      </div>
+
+      <div class="form-group">
+        <label for="skuCode">SKU Code</label>
+        <input type="text" id="skuCode" class="form-control" placeholder="e.g. SEED-AGER-001" required>
+      </div>
+
+      <div class="form-group">
+        <label for="skuDescription">Item Description</label>
+        <input type="text" id="skuDescription" class="form-control" placeholder="e.g. Ageratum Flower Seeds">
+      </div>
+
+      <div class="form-group">
+        <label for="skuCategory">Category</label>
+        <input type="text" id="skuCategory" class="form-control" placeholder="e.g. FLOWER SEED">
+      </div>
+
+      <div class="form-group">
+        <label for="skuPoQty">No. of Qty. in PO</label>
+        <input type="number" id="skuPoQty" class="form-control" min="0" required>
+      </div>
+
+      <div class="form-group">
+        <label for="skuSentQty">Sent Qty.</label>
+        <input type="number" id="skuSentQty" class="form-control" min="0" required>
+      </div>
+
+      <div class="form-group">
+        <label>Shortage Qty. (Variance) / Variance %</label>
+        <div id="skuVariancePreview" style="padding: 10px 12px; background: rgba(148, 163, 184, 0.12); border-radius: 8px; font-weight: 600; color: var(--text-muted);">Enter PO &amp; Sent qty to preview</div>
+      </div>
+
+      <div class="form-group">
+        <label for="skuStatus">Status</label>
+        <select id="skuStatus" class="form-control" required></select>
+      </div>
+
+      <div class="form-group">
+        <label for="skuShortageReason">Shortage Reason</label>
+        <select id="skuShortageReason" class="form-control"></select>
+      </div>
+
+      <div class="form-group">
+        <label for="skuNotes">Notes</label>
+        <input type="text" id="skuNotes" class="form-control" placeholder="Optional notes">
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="cancelSkuDialogBtn" class="btn btn-secondary">Cancel</button>
+        <button type="submit" id="saveSkuDialogBtn" class="btn btn-primary">Save Detail</button>
       </div>
     </form>
   </dialog>

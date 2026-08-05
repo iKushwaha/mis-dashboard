@@ -22,7 +22,10 @@ const DEFAULT_STORES = [
     itemsInPo: 71,
     verifiedPerson: "Pushpendra",
     status: "DELIVERED",
-    reasonOfShortage: "some Of The Item Block For Future Order"
+    reasonOfShortage: "Some Of The Item Block For Future Order",
+    shortageDetails: [
+      { sku: "SEED-BLSM-200", itemDescription: "Balsam Mix (200 Seeds)", category: "FLOWER SEED", poQty: 100, sentQty: 89, status: "PARTIAL", shortageReason: "Some Of The Item Block For Future Order", notes: "Blocked for future order" }
+    ]
   },
   {
     id: "store-3",
@@ -34,7 +37,12 @@ const DEFAULT_STORES = [
     itemsInPo: 210,
     verifiedPerson: "Pushpendra",
     status: "SHORTAGE",
-    reasonOfShortage: "material not arranged as per Requested"
+    reasonOfShortage: "Material Not Arranged As Per Requested",
+    shortageDetails: [
+      { sku: "SEED-AGER-100", itemDescription: "Ageratum Flower Seeds", category: "FLOWER SEED", poQty: 500, sentQty: 300, status: "SHORTAGE", shortageReason: "Material Not Arranged As Per Requested", notes: "Awaiting vendor stock" },
+      { sku: "SEED-COR-250", itemDescription: "Coriander Seeds - 250 g", category: "SEEDS", poQty: 450, sentQty: 400, status: "PARTIAL", shortageReason: "Vendor Supply Delay", notes: "-" },
+      { sku: "SEED-ALY-200", itemDescription: "Alyssum (200 Seeds)", category: "FLOWER SEED", poQty: 300, sentQty: 190, status: "SHORTAGE", shortageReason: "Material Not Arranged As Per Requested", notes: "-" }
+    ]
   },
   {
     id: "store-4",
@@ -71,8 +79,35 @@ let state = {
   sortDir: "asc",
   chartMode: "store",
   chartType: "bar",
-  chartMetric: "all"
+  chartMetric: "all",
+  skuStoreFilter: "all",
+  skuEditingId: null,
+  skuSortKey: "sku",
+  skuSortDir: "asc"
 };
+
+// Shortage configuration
+const SHORTAGE_REASONS = [
+  "Some Of The Item Block For Future Order",
+  "Material Not Arranged As Per Requested",
+  "Pending Clearance Before Dispatch",
+  "Vendor Supply Delay",
+  "Packing Error / Miscount",
+  "Transport Capacity Constraint",
+  "Damaged In Transit",
+  "Other"
+];
+
+const SKU_STATUSES = ["FULFILLED", "PARTIAL", "SHORTAGE", "NOT DISPATCHED"];
+
+function normEnumKey(value) {
+  return String(value === null || value === undefined ? "" : value).trim().toUpperCase().replace(/\s+/g, " ");
+}
+
+function findEnum(value, list) {
+  const key = normEnumKey(value);
+  return list.find(option => normEnumKey(option) === key) || null;
+}
 
 // SVG Icon Helpers
 const SVG_ICONS = {
@@ -151,8 +186,17 @@ function setupEventListeners() {
     document.getElementById("dispatchDate").value = today;
     document.getElementById("verifiedPerson").value = "Pushpendra";
     document.getElementById("status").value = "DELIVERED";
+    populateReasonSelect(document.getElementById("shortageReason"), "");
+    updateShortageHint();
     
     dialog.showModal();
+  });
+
+  // Live shortage hint while editing quantities
+  const poQtyInput = document.getElementById("poQty");
+  const sentQtyInput = document.getElementById("sentQty");
+  [poQtyInput, sentQtyInput].forEach(input => {
+    input.addEventListener("input", updateShortageHint);
   });
 
   // Dialog Closing
@@ -191,21 +235,22 @@ function setupEventListeners() {
     const itemsInPo = parseInt(document.getElementById("itemsInPo").value) || 0;
     const verifiedPerson = document.getElementById("verifiedPerson").value;
     const status = document.getElementById("status").value;
-    const reasonOfShortage = document.getElementById("reasonOfShortage").value || "-";
+    const reasonOfShortage = document.getElementById("shortageReason").value || "-";
 
     if (id) {
       // Edit mode
       const index = state.stores.findIndex(s => s.id === id);
       if (index !== -1) {
         state.stores[index] = {
-          id, storeName, poDate, dispatchDate, poQty, sentQty, itemsInPo, verifiedPerson, status, reasonOfShortage
+          ...state.stores[index],
+          storeName, poDate, dispatchDate, poQty, sentQty, itemsInPo, verifiedPerson, status, reasonOfShortage
         };
       }
     } else {
       // Add mode
       const newStore = {
         id: "store-" + Date.now(),
-        storeName, poDate, dispatchDate, poQty, sentQty, itemsInPo, verifiedPerson, status, reasonOfShortage
+        storeName, poDate, dispatchDate, poQty, sentQty, itemsInPo, verifiedPerson, status, reasonOfShortage, shortageDetails: []
       };
       state.stores.push(newStore);
     }
@@ -408,6 +453,86 @@ function setupEventListeners() {
     state.chartMode = "status";
     renderChart();
     syncChartControls();
+  });
+
+  // Shortage SKU-Wise Details controls
+  const addSkuBtn = document.getElementById("addSkuBtn");
+  const importSkuBtn = document.getElementById("importSkuBtn");
+  const exportSkuBtn = document.getElementById("exportSkuBtn");
+  const skuFileInput = document.getElementById("skuFileInput");
+  const skuStoreFilter = document.getElementById("skuStoreFilter");
+  const skuDialog = document.getElementById("skuDialog");
+  const skuForm = document.getElementById("skuForm");
+
+  addSkuBtn.addEventListener("click", () => openSkuDialog(null, null));
+
+  importSkuBtn.addEventListener("click", () => skuFileInput.click());
+
+  skuFileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    skuFileInput.value = "";
+    importSkuDetails(file);
+  });
+
+  exportSkuBtn.addEventListener("click", exportSkuDetails);
+
+  skuStoreFilter.addEventListener("change", () => {
+    state.skuStoreFilter = skuStoreFilter.value;
+    renderShortageSection();
+  });
+
+  document.querySelectorAll("#skuTable th.sortable").forEach(th => {
+    th.addEventListener("click", () => {
+      const key = th.dataset.sort;
+      if (state.skuSortKey === key) {
+        state.skuSortDir = state.skuSortDir === "asc" ? "desc" : "asc";
+      } else {
+        state.skuSortKey = key;
+        state.skuSortDir = "asc";
+      }
+      renderShortageSection();
+    });
+  });
+
+  document.getElementById("closeSkuDialogBtn").addEventListener("click", () => skuDialog.close());
+  document.getElementById("cancelSkuDialogBtn").addEventListener("click", () => skuDialog.close());
+
+  ["skuPoQty", "skuSentQty"].forEach(id => {
+    document.getElementById(id).addEventListener("input", updateSkuVariancePreview);
+  });
+
+  skuForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const skuId = document.getElementById("formSkuId").value;
+    const storeId = document.getElementById("skuStore").value;
+    const store = state.stores.find(s => s.id === storeId);
+    if (!store) return;
+
+    const detail = {
+      id: skuId || "sku-" + Date.now(),
+      sku: document.getElementById("skuCode").value.trim(),
+      itemDescription: document.getElementById("skuDescription").value.trim(),
+      category: document.getElementById("skuCategory").value.trim(),
+      poQty: parseInt(document.getElementById("skuPoQty").value) || 0,
+      sentQty: parseInt(document.getElementById("skuSentQty").value) || 0,
+      status: document.getElementById("skuStatus").value,
+      shortageReason: document.getElementById("skuShortageReason").value || "",
+      notes: document.getElementById("skuNotes").value.trim() || "-"
+    };
+
+    const details = storeDetails(store);
+    if (skuId) {
+      const idx = details.findIndex(d => d.id === skuId);
+      if (idx !== -1) details[idx] = detail;
+    } else {
+      details.push(detail);
+    }
+    store.shortageDetails = details;
+
+    saveState();
+    skuDialog.close();
+    renderDashboard();
   });
 }
 
@@ -693,7 +818,8 @@ window.editStore = function(id) {
   document.getElementById("itemsInPo").value = store.itemsInPo;
   document.getElementById("verifiedPerson").value = store.verifiedPerson;
   document.getElementById("status").value = store.status;
-  document.getElementById("reasonOfShortage").value = store.reasonOfShortage === "-" ? "" : store.reasonOfShortage;
+  populateReasonSelect(document.getElementById("shortageReason"), store.reasonOfShortage === "-" ? "" : store.reasonOfShortage);
+  updateShortageHint();
 
   document.getElementById("storeDialog").showModal();
 };
@@ -707,6 +833,369 @@ window.deleteStore = function(id) {
   }
 };
 
+// ---- Shortage SKU-Wise Details helpers ----
+
+function storeShortage(store) {
+  return Math.max(0, (store.poQty || 0) - (store.sentQty || 0));
+}
+
+function storeDetails(store) {
+  return Array.isArray(store.shortageDetails) ? store.shortageDetails : [];
+}
+
+function detailVariance(detail) {
+  return Math.max(0, (detail.poQty || 0) - (detail.sentQty || 0));
+}
+
+function detailVariancePct(detail) {
+  const po = detail.poQty || 0;
+  return po > 0 ? (detailVariance(detail) / po) * 100 : 0;
+}
+
+function populateReasonSelect(select, value) {
+  select.innerHTML = '<option value="">-- Select Reason --</option>';
+  SHORTAGE_REASONS.forEach(reason => {
+    const opt = document.createElement("option");
+    opt.value = reason;
+    opt.textContent = reason;
+    select.appendChild(opt);
+  });
+  if (value) {
+    const match = findEnum(value, SHORTAGE_REASONS);
+    if (match) {
+      select.value = match;
+    } else {
+      const opt = document.createElement("option");
+      opt.value = value;
+      opt.textContent = value;
+      select.appendChild(opt);
+      select.value = value;
+    }
+  }
+}
+
+function populateSkuStatusSelect(value) {
+  const select = document.getElementById("skuStatus");
+  select.innerHTML = "";
+  SKU_STATUSES.forEach(status => {
+    const opt = document.createElement("option");
+    opt.value = status;
+    opt.textContent = status;
+    select.appendChild(opt);
+  });
+  if (value) select.value = value;
+}
+
+function populateSkuStoreSelect(selectedId) {
+  const select = document.getElementById("skuStore");
+  select.innerHTML = "";
+  state.stores.forEach(store => {
+    const opt = document.createElement("option");
+    opt.value = store.id;
+    opt.textContent = store.storeName;
+    select.appendChild(opt);
+  });
+  if (selectedId) select.value = selectedId;
+}
+
+function updateShortageHint() {
+  const poQty = parseInt(document.getElementById("poQty").value) || 0;
+  const sentQty = parseInt(document.getElementById("sentQty").value) || 0;
+  const hint = document.getElementById("shortageHint");
+  if (hint) hint.style.display = sentQty < poQty ? "block" : "none";
+}
+
+function updateSkuVariancePreview() {
+  const poQty = parseInt(document.getElementById("skuPoQty").value) || 0;
+  const sentQty = parseInt(document.getElementById("skuSentQty").value) || 0;
+  const variance = Math.max(0, poQty - sentQty);
+  const pct = poQty > 0 ? (variance / poQty) * 100 : 0;
+  const preview = document.getElementById("skuVariancePreview");
+  if (preview) {
+    if (variance > 0) {
+      preview.style.color = "var(--accent-red)";
+      preview.textContent = `${variance.toLocaleString()} units (${pct.toFixed(2)}%)`;
+    } else {
+      preview.style.color = "var(--accent-green)";
+      preview.textContent = "0 units (0.00%) - fully dispatched";
+    }
+  }
+}
+
+function getSkuSortValue(detail, store, key) {
+  switch (key) {
+    case "storeName": return String(store.storeName).toLowerCase();
+    case "variance": return detailVariance(detail);
+    case "variancePct": return detailVariancePct(detail);
+    case "poQty": return detail.poQty || 0;
+    case "sentQty": return detail.sentQty || 0;
+    default: return String(detail[key] || "").toLowerCase();
+  }
+}
+
+function getSkuRows() {
+  const rows = [];
+  state.stores.forEach(store => {
+    const details = storeDetails(store);
+    if (state.skuStoreFilter === "all") {
+      details.forEach(d => rows.push({ store, detail: d }));
+    } else if (store.id === state.skuStoreFilter) {
+      details.forEach(d => rows.push({ store, detail: d }));
+    }
+  });
+  return rows;
+}
+
+function renderShortageSection() {
+  const filterSelect = document.getElementById("skuStoreFilter");
+  filterSelect.innerHTML = '<option value="all">All Short Stores</option>';
+  state.stores
+    .filter(store => storeShortage(store) > 0 || storeDetails(store).length > 0)
+    .forEach(store => {
+      const opt = document.createElement("option");
+      opt.value = store.id;
+      opt.textContent = `${store.storeName} (${storeShortage(store).toLocaleString()} short)`;
+      filterSelect.appendChild(opt);
+    });
+  filterSelect.value = state.skuStoreFilter;
+
+  const tableBody = document.getElementById("skuTableBody");
+  tableBody.innerHTML = "";
+
+  document.querySelectorAll("#skuTable th.sortable").forEach(th => {
+    th.classList.remove("is-asc", "is-desc");
+    if (th.dataset.sort === state.skuSortKey) {
+      th.classList.add(state.skuSortDir === "asc" ? "is-asc" : "is-desc");
+    }
+  });
+
+  const rows = getSkuRows().sort((a, b) => {
+    const av = getSkuSortValue(a.detail, a.store, state.skuSortKey);
+    const bv = getSkuSortValue(b.detail, b.store, state.skuSortKey);
+    if (typeof av === "number" && typeof bv === "number") {
+      return state.skuSortDir === "asc" ? av - bv : bv - av;
+    }
+    return state.skuSortDir === "asc" ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+  });
+
+  if (rows.length === 0) {
+    const hasShortStores = state.stores.some(store => storeShortage(store) > 0);
+    const msg = hasShortStores
+      ? `No SKU details uploaded for ${state.skuStoreFilter === "all" ? "the short stores" : "this store"}. Use "Add SKU Detail" or "Import Shortage SKUs".`
+      : "No shortage found - SKU-wise details are not required.";
+    tableBody.innerHTML = `<tr><td colspan="12" style="text-align: center; color: var(--text-muted); padding: 32px;">${msg}</td></tr>`;
+    return;
+  }
+
+  rows.forEach(({ store, detail }) => {
+    const tr = document.createElement("tr");
+    const variance = detailVariance(detail);
+    const pct = detailVariancePct(detail);
+    const statusClass = detail.status === "FULFILLED" ? "badge-green" : (detail.status === "PARTIAL" ? "badge-orange" : "badge-red");
+    tr.innerHTML = `
+      <td style="font-weight: 600;">${store.storeName}</td>
+      <td style="font-family: monospace; font-weight: 600;">${detail.sku}</td>
+      <td>${detail.itemDescription || "-"}</td>
+      <td>${detail.category || "-"}</td>
+      <td>${(detail.poQty || 0).toLocaleString()}</td>
+      <td>${(detail.sentQty || 0).toLocaleString()}</td>
+      <td><span class="cell-shortage-qty ${variance > 0 ? "has-shortage" : ""}">${variance.toLocaleString()}</span></td>
+      <td>${pct.toFixed(2)}%</td>
+      <td><span class="badge ${statusClass}">${detail.status}</span></td>
+      <td>${detail.shortageReason || "-"}</td>
+      <td style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${detail.notes || ""}">${detail.notes || "-"}</td>
+      <td class="table-actions">
+        <button class="btn btn-secondary btn-icon" onclick="editSkuDetail('${store.id}','${detail.id}')" title="Edit">${SVG_ICONS.edit}</button>
+        <button class="btn btn-danger btn-icon" onclick="deleteSkuDetail('${store.id}','${detail.id}')" title="Delete">${SVG_ICONS.delete}</button>
+      </td>
+    `;
+    tableBody.appendChild(tr);
+  });
+}
+
+function openSkuDialog(storeId, skuId) {
+  state.skuEditingId = skuId || null;
+  const dialog = document.getElementById("skuDialog");
+  document.getElementById("skuDialogTitle").innerText = skuId ? "Edit SKU Shortage Detail" : "Add SKU Shortage Detail";
+  document.getElementById("skuForm").reset();
+  document.getElementById("formSkuId").value = skuId || "";
+
+  if (skuId) {
+    const target = state.stores.find(s => storeDetails(s).some(d => d.id === skuId));
+    if (target) {
+      const detail = storeDetails(target).find(d => d.id === skuId);
+      populateSkuStoreSelect(target.id);
+      document.getElementById("skuCode").value = detail.sku;
+      document.getElementById("skuDescription").value = detail.itemDescription || "";
+      document.getElementById("skuCategory").value = detail.category || "";
+      document.getElementById("skuPoQty").value = detail.poQty || 0;
+      document.getElementById("skuSentQty").value = detail.sentQty || 0;
+      populateSkuStatusSelect(detail.status);
+      populateReasonSelect(document.getElementById("skuShortageReason"), detail.shortageReason || "");
+      document.getElementById("skuNotes").value = detail.notes || "";
+    }
+  } else {
+    populateSkuStoreSelect(state.skuStoreFilter !== "all" ? state.skuStoreFilter : (state.stores[0] ? state.stores[0].id : ""));
+    populateSkuStatusSelect(SKU_STATUSES[0]);
+    populateReasonSelect(document.getElementById("skuShortageReason"), "");
+  }
+  updateSkuVariancePreview();
+  dialog.showModal();
+}
+
+window.editSkuDetail = function(storeId, skuId) {
+  openSkuDialog(storeId, skuId);
+};
+
+window.deleteSkuDetail = function(storeId, skuId) {
+  const store = state.stores.find(s => s.id === storeId);
+  if (!store) return;
+  if (confirm("Are you sure you want to delete this SKU shortage detail?")) {
+    store.shortageDetails = storeDetails(store).filter(d => d.id !== skuId);
+    saveState();
+    renderDashboard();
+  }
+};
+
+function importSkuDetails(file) {
+  const SKU_ALIASES = {
+    storeName: ["Store Name", "Store", "storeName"],
+    sku: ["SKU Code", "SKU", "SKU Code", "sku"],
+    itemDescription: ["Item Description", "Description", "Item", "itemDescription"],
+    category: ["Category", "category"],
+    poQty: ["No. of Qty. in PO", "Qty. in PO", "PO Qty", "PO Quantity", "poQty"],
+    sentQty: ["Sent Qty", "Sent Quantity", "sentQty"],
+    variance: ["Shortage Qty", "Shortage (Variance)", "Variance", "Shortage Qty. as Variance"],
+    variancePct: ["Variance %", "Variance Percent", "variancePct"],
+    status: ["Status", "status"],
+    shortageReason: ["Shortage Reason", "Reason of Shortage", "Reason", "shortageReason"],
+    notes: ["Notes", "Note", "notes"]
+  };
+
+  BulkImport.openImport({
+    file,
+    fieldAliases: SKU_ALIASES,
+    existingCount: getSkuRows().length,
+    previewColumns: [
+      { field: "storeName", label: "Store Name" },
+      { field: "sku", label: "SKU Code" },
+      { field: "itemDescription", label: "Item Description" },
+      { field: "category", label: "Category" },
+      { field: "poQty", label: "Qty. in PO" },
+      { field: "sentQty", label: "Sent Qty." },
+      { field: "status", label: "Status" },
+      { field: "shortageReason", label: "Shortage Reason" }
+    ],
+    transformRow: (row) => {
+      const errors = [];
+      const sku = BulkImport.parseText(row.sku);
+      if (!sku) errors.push("SKU Code is required");
+
+      const storeName = BulkImport.parseText(row.storeName);
+      let storeId = null;
+      if (storeName) {
+        const match = state.stores.find(s => normEnumKey(s.storeName) === normEnumKey(storeName));
+        if (match) storeId = match.id;
+        else errors.push(`Store "${storeName}" not found`);
+      } else if (state.skuStoreFilter !== "all") {
+        storeId = state.skuStoreFilter;
+      } else {
+        errors.push("Store Name is required");
+      }
+
+      const poQty = BulkImport.parseNumber(row.poQty, errors, "Qty. in PO");
+      if (poQty !== null && poQty < 0) errors.push("Qty. in PO cannot be negative");
+
+      const sentQty = BulkImport.parseNumber(row.sentQty, errors, "Sent Qty");
+      if (sentQty !== null && sentQty < 0) errors.push("Sent Qty cannot be negative");
+
+      const statusText = BulkImport.parseText(row.status);
+      const statusRes = statusText ? BulkImport.parseEnum(statusText, SKU_STATUSES, "Status") : { value: "" };
+      if (statusRes.error) errors.push(statusRes.error);
+
+      let shortageReason = "";
+      const reasonText = BulkImport.parseText(row.shortageReason);
+      if (reasonText) {
+        const match = findEnum(reasonText, SHORTAGE_REASONS);
+        shortageReason = match || reasonText;
+      }
+
+      return {
+        errors,
+        value: {
+          storeId,
+          sku,
+          itemDescription: BulkImport.parseText(row.itemDescription),
+          category: BulkImport.parseText(row.category),
+          poQty: poQty ?? 0,
+          sentQty: sentQty ?? 0,
+          status: statusRes.value || "SHORTAGE",
+          shortageReason,
+          notes: BulkImport.parseText(row.notes) || "-"
+        }
+      };
+    },
+    onImport: (records) => {
+      let imported = 0;
+      const byStore = {};
+      records.forEach(r => {
+        if (!byStore[r.storeId]) byStore[r.storeId] = [];
+        byStore[r.storeId].push(r);
+      });
+      Object.keys(byStore).forEach(storeId => {
+        const store = state.stores.find(s => s.id === storeId);
+        if (!store) return;
+        const details = storeDetails(store);
+        byStore[storeId].forEach(r => {
+          const existing = details.findIndex(d => normEnumKey(d.sku) === normEnumKey(r.sku));
+          if (existing !== -1) {
+            details[existing] = { id: details[existing].id, ...r };
+          } else {
+            details.push({ id: "sku-" + Date.now() + "-" + imported, ...r });
+          }
+          imported++;
+        });
+        store.shortageDetails = details;
+      });
+      saveState();
+      renderDashboard();
+      alert(`Successfully imported ${imported} SKU shortage detail${imported !== 1 ? "s" : ""}.`);
+    }
+  });
+}
+
+function exportSkuDetails() {
+  const rows = getSkuRows();
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "Store Name,SKU Code,Item Description,Category,No. of Qty. in PO,Sent Qty,Shortage Qty (Variance),Variance %,Status,Shortage Reason,Notes\n";
+
+  rows.forEach(({ store, detail }) => {
+    const variance = detailVariance(detail);
+    const pct = detailVariancePct(detail).toFixed(2);
+    const row = [
+      `"${store.storeName}"`,
+      `"${detail.sku}"`,
+      `"${detail.itemDescription || "-"}"`,
+      `"${detail.category || "-"}"`,
+      detail.poQty || 0,
+      detail.sentQty || 0,
+      variance,
+      pct,
+      `"${detail.status}"`,
+      `"${detail.shortageReason || "-"}"`,
+      `"${detail.notes || "-"}"`
+    ].join(",");
+    csvContent += row + "\n";
+  });
+
+  const anchor = document.createElement("a");
+  anchor.setAttribute("href", encodeURI(csvContent));
+  anchor.setAttribute("download", `shortage_sku_details_${new Date().toISOString().split("T")[0]}.csv`);
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+}
+
 function getStoreSortValue(store, key) {
   switch (key) {
     case "shortage": return Math.max(0, store.poQty - store.sentQty);
@@ -714,6 +1203,7 @@ function getStoreSortValue(store, key) {
     case "sentQty": return store.sentQty || 0;
     case "itemsInPo": return store.itemsInPo || 0;
     case "status": return store.status || "";
+    case "shortageDetails": return storeDetails(store).length;
     default: return String(store[key] || "").toLowerCase();
   }
 }
@@ -782,6 +1272,13 @@ function renderDashboard() {
 
     const statusBadgeClass = s.status === "DELIVERED" ? "badge-green" : (s.status === "READY TO DISPATCH" ? "badge-blue" : (s.status === "SHORTAGE" ? "badge-red" : "badge-orange"));
 
+    const detailCount = storeDetails(s).length;
+    const detailBadge = shortage > 0
+      ? (detailCount > 0
+          ? `<span class="badge badge-green" title="SKU-wise shortage details uploaded">${detailCount} SKU${detailCount !== 1 ? "s" : ""}</span>`
+          : `<span class="badge badge-red" title="SKU-wise shortage details required">DETAILS PENDING</span>`)
+      : `<span style="color: var(--text-muted);">-</span>`;
+
     tr.innerHTML = `
       <td style="font-weight: 600;">${s.storeName}</td>
       <td>${formatDate(s.poDate)}</td>
@@ -793,6 +1290,7 @@ function renderDashboard() {
       <td>${s.verifiedPerson}</td>
       <td><span class="badge ${statusBadgeClass}">${s.status}</span></td>
       <td style="font-style: italic; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${s.reasonOfShortage}">${s.reasonOfShortage}</td>
+      <td>${detailBadge}</td>
       <td class="table-actions">
         <button class="btn btn-secondary btn-icon" onclick="editStore('${s.id}')" title="Edit">${SVG_ICONS.edit}</button>
         <button class="btn btn-danger btn-icon" onclick="deleteStore('${s.id}')" title="Delete">${SVG_ICONS.delete}</button>
@@ -803,6 +1301,7 @@ function renderDashboard() {
 
   // Render Summary Row in Table if there are stores
   if (state.stores.length > 0) {
+    const totalDetailCount = state.stores.reduce((acc, s) => acc + storeDetails(s).length, 0);
     const summaryTr = document.createElement("tr");
     summaryTr.className = "summary-row";
     summaryTr.innerHTML = `
@@ -816,11 +1315,12 @@ function renderDashboard() {
       <td>-</td>
       <td><span class="badge badge-green">DELIVERED</span></td>
       <td>-</td>
+      <td>${totalDetailCount} SKU${totalDetailCount !== 1 ? "s" : ""}</td>
       <td class="table-actions"></td>
     `;
     tableBody.appendChild(summaryTr);
   } else {
-    tableBody.innerHTML = `<tr><td colspan="11" style="text-align: center; color: var(--text-muted); padding: 32px;">No dispatch records found. Click "Add Store Dispatch" to create one.</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="12" style="text-align: center; color: var(--text-muted); padding: 32px;">No dispatch records found. Click "Add Store Dispatch" to create one.</td></tr>`;
   }
 
   // 4. Render Dynamic Operational Shortage & Root Cause Analysis
@@ -828,6 +1328,9 @@ function renderDashboard() {
 
   // 5. Render Dynamic Action Items & Strategic Recommendations
   renderRecommendations(kpi);
+
+  // 5.1 Render Shortage SKU-Wise Details
+  renderShortageSection();
 
   // 6. Draw Chart
   renderChart();
@@ -980,7 +1483,6 @@ function renderRecommendations(kpi) {
     const reason = (s.reasonOfShortage || "").toLowerCase();
     return sh > 0 && (reason.includes("block") || reason.includes("future") || reason.includes("reserve") || reason.includes("hold"));
   });
-
   if (blockedStores.length > 0) {
     const combinedShortage = blockedStores.reduce((acc, s) => acc + Math.max(0, s.poQty - s.sentQty), 0);
     const storeNamesText = blockedStores.map(s => s.storeName).join(" and ");
@@ -1004,6 +1506,21 @@ function renderRecommendations(kpi) {
       <span class="tag-badge" style="background-color: var(--badge-red); color: var(--accent-red); border-color: rgba(239,68,68,0.25);">SUPPLY OPTIMIZATION</span>
       <div class="recommendation-text">
         <strong>Fulfillment Warning:</strong> Dispatch efficiency is currently at <strong>${kpi.efficiency.toFixed(2)}%</strong> (below the 90% performance baseline). Initiate weekly audit reviews on PO lead-times and safety stock.
+      </div>
+    `;
+    container.appendChild(row);
+  }
+
+  // 4. Shortage documentation compliance
+  const missingDetailsStores = state.stores.filter(s => storeShortage(s) > 0 && storeDetails(s).length === 0);
+  if (missingDetailsStores.length > 0) {
+    const namesText = missingDetailsStores.map(s => s.storeName).join(", ");
+    const row = document.createElement("div");
+    row.className = "recommendation-row";
+    row.innerHTML = `
+      <span class="tag-badge" style="background-color: var(--badge-red); color: var(--accent-red); border-color: rgba(248,113,113,0.25);">SHORTAGE DOCUMENTATION</span>
+      <div class="recommendation-text">
+        <strong>SKU-wise shortage details pending for: ${namesText}.</strong> Upload the short-SKU break-up (SKU Code, Item Description, Category, PO/Sent Qty, Variance, Status, Notes) in the Shortage SKU-Wise Details section to complete the shortage documentation.
       </div>
     `;
     container.appendChild(row);
