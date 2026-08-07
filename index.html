@@ -21,6 +21,7 @@
           <option value="store-dispatch.html">Store Dispatch Report</option>
           <option value="inventory.html">Inventory Cycle Count Report</option>
           <option value="rtv.html">Return to Vendor/Origin Report</option>
+          <option value="logistics.html">B2B &amp; B2C Logistics &amp; Dispatch Report</option>
         </select>
         <button id="themeToggle" class="btn btn-secondary btn-icon" title="Toggle Theme" aria-label="Toggle dark/light theme">
           <!-- Sun/Moon icon toggle handled in JS -->
@@ -42,6 +43,33 @@
           <span class="hero-stat" id="heroStores">-</span>
           <span class="hero-stat" id="heroItems">-</span>
           <span class="hero-stat" id="heroEntries">-</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Report Snapshots -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h3 class="section-title">Report Snapshots</h3>
+      </div>
+      <div class="overview-chart-grid">
+        <div class="chart-card">
+          <h4 style="font-weight: 600; font-size: 1rem;">Store Dispatch &mdash; PO vs Sent</h4>
+          <div class="chart-container">
+            <canvas id="miniDispatchChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h4 style="font-weight: 600; font-size: 1rem;">Inventory &mdash; Top Short &amp; Over SKUs</h4>
+          <div class="chart-container">
+            <canvas id="miniInventoryChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h4 style="font-weight: 600; font-size: 1rem;">RTV &mdash; Volume by Warehouse</h4>
+          <div class="chart-container">
+            <canvas id="miniRtvChart"></canvas>
+          </div>
         </div>
       </div>
     </section>
@@ -151,6 +179,8 @@
 
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="src/js/supabase-config.js"></script>
   <script src="src/js/data-service.js"></script>

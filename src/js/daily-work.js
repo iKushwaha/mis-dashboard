@@ -252,15 +252,15 @@ function renderChart() {
 
   const singleSeries = ["pie", "doughnut", "polarArea"].includes(chartType);
   const palette = [
-    "#2dd4bf", "#22c55e", "#f87171", "#a3e635", "#fbbf24", "#60a5fa",
-    "#c084fc", "#fb923c", "#34d399", "#4ade80", "#facc15", "#38bdf8",
-    "#f472b6", "#a78bfa", "#fb7185"
+    "#3b82f6", "#f97316", "#2dd4bf", "#ef4444", "#a855f7", "#eab308",
+    "#22c55e", "#ec4899", "#06b6d4", "#fb923c", "#8b5cf6", "#f43f5e",
+    "#10b981", "#f472b6", "#0ea5e9", "#facc15"
   ];
   const metricData = { count: data.count, qty: data.qty };
   const metric = chartMetric === "qty" ? "qty" : "count";
   const color = chartMetric === "qty"
-    ? { dark: "rgba(45, 212, 191, 0.8)", light: "rgba(13, 148, 136, 0.85)", border: "var(--accent-blue)" }
-    : { dark: "rgba(163, 230, 53, 0.85)", light: "rgba(77, 124, 15, 0.85)", border: "var(--accent-indigo)" };
+    ? { dark: "rgba(59, 130, 246, 0.8)", light: "rgba(37, 99, 235, 0.85)", border: "#3b82f6" }
+    : { dark: "rgba(249, 115, 22, 0.85)", light: "rgba(234, 88, 12, 0.85)", border: "#f97316" };
 
   const isHorizontal = chartType === "horizontalBar";
   const isStacked = chartType === "stackedBar";

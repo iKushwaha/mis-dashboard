@@ -464,9 +464,9 @@ function buildChart(canvasId, type, labels, datasets, isDark, tooltipLabel, lege
 
 // Palette used for single-series segment charts
 const PALETTE = [
-  "#22c55e", "#16a34a", "#2dd4bf", "#a3e635", "#fbbf24", "#f87171",
-  "#60a5fa", "#c084fc", "#fb923c", "#34d399", "#4ade80", "#facc15",
-  "#38bdf8", "#f472b6", "#a78bfa", "#fb7185"
+  "#3b82f6", "#f97316", "#2dd4bf", "#ef4444", "#a855f7", "#eab308",
+  "#22c55e", "#ec4899", "#06b6d4", "#fb923c", "#8b5cf6", "#f43f5e",
+  "#10b981", "#f472b6", "#0ea5e9", "#facc15"
 ];
 
 function groupBy(entries, keyFn) {
@@ -494,7 +494,7 @@ function renderWarehouseChart() {
   buildChart("warehouseChart", state.chartType, labels, [{
     label: "% of Total Volume",
     data: singleSeries ? pcts.map(p => Math.round(p * 100) / 100) : pcts,
-    backgroundColor: singleSeries ? labels.map((_, i) => PALETTE[i % PALETTE.length]) : (isDark ? "rgba(45, 212, 191, 0.8)" : "rgba(13, 148, 136, 0.85)"),
+    backgroundColor: singleSeries ? labels.map((_, i) => PALETTE[i % PALETTE.length]) : (isDark ? "rgba(59, 130, 246, 0.8)" : "rgba(37, 99, 235, 0.85)"),
     borderColor: isDark ? "rgba(15, 23, 42, 0.35)" : "rgba(255,255,255,0.5)",
     borderWidth: singleSeries ? 1 : 1
   }], isDark, (ctx) => {
@@ -513,8 +513,8 @@ function renderChannelChart() {
   buildChart("channelChart", "bar", groups.map(g => g[0]), [{
     label: "Received Qty",
     data: groups.map(g => g[1]),
-    backgroundColor: isDark ? "rgba(34, 197, 94, 0.8)" : "rgba(5, 150, 105, 0.85)",
-    borderColor: "var(--accent-green)",
+    backgroundColor: isDark ? "rgba(249, 115, 22, 0.8)" : "rgba(234, 88, 12, 0.85)",
+    borderColor: "#f97316",
     borderWidth: 1,
     borderRadius: 4
   }], isDark);

@@ -31,6 +31,7 @@
           <option value="rtv.html">Return to Vendor/Origin Report</option>
           <option value="store-dispatch.html">Store Dispatch Report</option>
           <option value="inventory.html" selected>Inventory Cycle Count Report</option>
+          <option value="logistics.html">B2B &amp; B2C Logistics &amp; Dispatch Report</option>
         </select>
         <button id="themeToggle" class="btn btn-secondary btn-icon" title="Toggle Theme" aria-label="Toggle dark/light theme">
           <!-- Sun/Moon icon toggle handled in JS -->
@@ -173,10 +174,13 @@
             <option value="physical">Physical Qty</option>
             <option value="variance">Variance (Abs)</option>
           </select>
+          <span class="chart-toolbar-sep" aria-hidden="true"></span>
+          <label class="chart-toolbar-label" for="topNCount">SKUs:</label>
+          <input id="topNCount" type="number" class="chart-count-input" min="0" max="100" value="10" aria-label="Number of variance SKUs per direction">
         </div>
       </div>
       <div class="chart-card">
-        <h4 style="font-weight: 600; font-size: 1rem;" id="chartTitle">Variance by Item</h4>
+        <h4 style="font-weight: 600; font-size: 1rem;" id="chartTitle">Top 10 Short & Over SKUs</h4>
         <div class="chart-container">
           <canvas id="varianceChart"></canvas>
         </div>
@@ -331,7 +335,6 @@
 
   <!-- JavaScript Application -->
   <script src="src/js/data-import.js"></script>
-  <script src="src/js/chart-sizing.js"></script>
   <script src="src/js/date-filter.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="src/js/supabase-config.js"></script>

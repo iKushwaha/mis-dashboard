@@ -171,6 +171,7 @@ let state = {
   chartMode: "item",
   chartType: "bar",
   chartMetric: "all",
+  topCount: 10,
   sortKey: "sku",
   sortDir: "asc",
   filterStatus: "all",
@@ -566,7 +567,9 @@ function setupEventListeners() {
     state.chartMode = mode;
     filterByItem.classList.toggle("active", mode === "item");
     filterByCategory.classList.toggle("active", mode === "category");
-    document.getElementById("chartTitle").innerText = mode === "item" ? "Variance by Item" : "Variance by Category";
+    document.getElementById("chartTitle").innerText = mode === "item" ? "Top 10 Short & Over SKUs" : "Variance by Category";
+    const isItem = mode === "item";
+    document.getElementById("topNCount").disabled = !isItem;
     renderChart();
   };
 
@@ -589,6 +592,15 @@ function setupEventListeners() {
 
   chartMetricSelect.addEventListener("change", () => {
     state.chartMetric = chartMetricSelect.value;
+    renderChart();
+  });
+
+  // Top-N variance SKU count input (item mode only)
+  const topNInput = document.getElementById("topNCount");
+
+  topNInput.addEventListener("change", () => {
+    state.topCount = Math.max(0, Math.min(parseInt(topNInput.value, 10) || 0, 100));
+    topNInput.value = state.topCount;
     renderChart();
   });
 }
@@ -644,10 +656,14 @@ function renderChart() {
     physicalData = cats.map(c => catMap[c].physical);
     varianceData = cats.map(c => catMap[c].absVar);
   } else {
-    labels = state.items.map(s => s.itemName);
-    systemData = state.items.map(s => s.systemQty);
-    physicalData = state.items.map(s => s.physicalQty);
-    varianceData = state.items.map(s => getAbsVariance(s));
+    const over = state.items.filter(s => getVariance(s) > 0).sort((a, b) => getVariance(b) - getVariance(a));
+    const short = state.items.filter(s => getVariance(s) < 0).sort((a, b) => getVariance(a) - getVariance(b));
+    const top = [...over.slice(0, state.topCount), ...short.slice(0, state.topCount)];
+    const items = state.topCount > 0 && top.length === 0 ? state.items : top;
+    labels = items.map(s => s.itemName);
+    systemData = items.map(s => s.systemQty);
+    physicalData = items.map(s => s.physicalQty);
+    varianceData = items.map(s => getAbsVariance(s));
   }
 
   const chartType = state.chartType || "bar";
@@ -657,15 +673,15 @@ function renderChart() {
   const effectiveMetric = chartMetric === "all" && singleSeries ? "variance" : chartMetric;
 
   const colorMap = {
-    system: { dark: "rgba(163, 230, 53, 0.85)", light: "rgba(77, 124, 15, 0.85)", border: "var(--accent-indigo)" },
-    physical: { dark: "rgba(34, 197, 94, 0.8)", light: "rgba(5, 150, 105, 0.85)", border: "var(--accent-green)" },
-    variance: { dark: "rgba(248, 113, 113, 0.8)", light: "rgba(220, 38, 38, 0.85)", border: "var(--accent-red)" }
+    system: { dark: "rgba(59, 130, 246, 0.85)", light: "rgba(37, 99, 235, 0.85)", border: "#3b82f6" },
+    physical: { dark: "rgba(249, 115, 22, 0.8)", light: "rgba(234, 88, 12, 0.85)", border: "#f97316" },
+    variance: { dark: "rgba(248, 113, 113, 0.8)", light: "rgba(220, 38, 38, 0.85)", border: "#ef4444" }
   };
 
   const palette = [
-    "#22c55e", "#16a34a", "#2dd4bf", "#a3e635", "#fbbf24", "#f87171",
-    "#60a5fa", "#c084fc", "#fb923c", "#34d399", "#4ade80", "#facc15",
-    "#38bdf8", "#f472b6", "#a78bfa", "#fb7185"
+    "#3b82f6", "#f97316", "#2dd4bf", "#ef4444", "#a855f7", "#eab308",
+    "#22c55e", "#ec4899", "#06b6d4", "#fb923c", "#8b5cf6", "#f43f5e",
+    "#10b981", "#f472b6", "#0ea5e9", "#facc15"
   ];
 
   const metricData = {

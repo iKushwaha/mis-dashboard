@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ugaoo | B2B &amp; B2C Daily Logistics &amp; Order Dispatch</title>
+
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="src/css/index.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js Data Labels Plugin CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <!-- SheetJS CDN (CSV/XLSX export) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- Controls Bar -->
+    <div class="control-bar">
+      <h1>
+        <span class="brand-logo" aria-hidden="true"><img src="src/assets/ugaoo-logo.png" alt="Ugaoo logo"></span>
+      </h1>
+      <div class="control-group">
+        <select id="reportSwitcher" class="report-switcher" title="Switch Report" aria-label="Switch between reports" onchange="location.href=this.value">
+          <option value="index.html">Dashboard Overview - All Reports</option>
+          <option value="daily-work.html">Daily Work Report</option>
+          <option value="rtv.html">Return to Vendor/Origin Report</option>
+          <option value="store-dispatch.html">Store Dispatch Report</option>
+          <option value="inventory.html">Inventory Cycle Count Report</option>
+          <option value="logistics.html" selected>B2B &amp; B2C Logistics &amp; Dispatch Report</option>
+        </select>
+        <button id="themeToggle" class="btn btn-secondary btn-icon" title="Toggle Theme" aria-label="Toggle dark/light theme">
+          <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Report Header Block -->
+    <header class="report-header">
+      <div class="header-left">
+        <span class="header-badge">Logistics &amp; Fulfillment Operations</span>
+        <h2 id="reportTitle">B2B &amp; B2C DAILY LOGISTICS &amp; ORDER DISPATCH REPORT</h2>
+        <p>PO vs dispatch fulfilment, channel mix, value variance, and delivery-schedule outlook across every warehouse zone</p>
+      </div>
+      <div class="header-right">
+        <div class="header-meta-item">
+          <span class="header-meta-label">Dispatch Date</span>
+          <span class="header-meta-value" id="headerDispatchDate">-</span>
+        </div>
+        <div class="header-meta-item">
+          <span class="header-meta-label">Snapshot</span>
+          <span class="header-meta-value" id="headerSnapshot">Latest Day</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- KPI Cards Row -->
+    <section class="kpi-container" aria-label="Key Performance Indicators">
+
+      <!-- Total PO Quantity -->
+      <article class="kpi-card variant-blue" id="kpiTotalPO">
+        <span class="kpi-label">Total PO Quantity</span>
+        <span class="kpi-value" id="valTotalPO">0</span>
+        <span class="kpi-subtext" id="subTotalPO">Units Ordered</span>
+      </article>
+
+      <!-- Total Dispatched Quantity -->
+      <article class="kpi-card variant-indigo" id="kpiTotalDispatch">
+        <span class="kpi-label">Total Dispatched Quantity</span>
+        <span class="kpi-value" id="valTotalDispatch">0</span>
+        <span class="kpi-subtext" id="subTotalDispatch">Units Shipped Out</span>
+      </article>
+
+      <!-- Fulfillment Rate -->
+      <article class="kpi-card variant-green" id="kpiFulfillRate">
+        <span class="kpi-label">Fulfillment Rate</span>
+        <span class="kpi-value" id="valFulfillRate">0.00%</span>
+        <span class="kpi-subtext" id="subFulfillRate">Dispatch Qty / PO Qty</span>
+      </article>
+
+      <!-- Total Invoice Value -->
+      <article class="kpi-card variant-blue" id="kpiInvoiceValue">
+        <span class="kpi-label">Total Invoice Value</span>
+        <span class="kpi-value" id="valInvoiceValue">₹0</span>
+        <span class="kpi-subtext" id="subInvoiceValue">Net Revenue Finalized</span>
+      </article>
+
+      <!-- Fulfillment Leakage / Revenue Gap -->
+      <article class="kpi-card variant-red" id="kpiRevenueGap">
+        <span class="kpi-label">Fulfillment Leakage / Revenue Gap</span>
+        <span class="kpi-value" id="valRevenueGap">₹0</span>
+        <span class="kpi-subtext" id="subRevenueGap">PO Value − Invoice Value</span>
+      </article>
+
+    </section>
+
+    <!-- Charts Visualization -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h3 class="section-title">Visual Analytics</h3>
+        <div class="chart-toolbar" role="group" aria-label="Chart view controls">
+          <span class="chart-toolbar-label">View:</span>
+          <button id="viewAll" class="btn btn-filter active" type="button">All</button>
+          <button id="viewB2B" class="btn btn-filter" type="button">B2B</button>
+          <button id="viewB2C" class="btn btn-filter" type="button">B2C</button>
+        </div>
+      </div>
+
+      <div class="logistics-chart-grid">
+        <div class="chart-card">
+          <h4 style="font-weight: 600; font-size: 1rem;">Performance by Location &mdash; Fulfill Rate %</h4>
+          <div class="chart-container">
+            <canvas id="locationChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h4 style="font-weight: 600; font-size: 1rem;">Order Channel Share</h4>
+          <div class="chart-container">
+            <canvas id="channelChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h4 style="font-weight: 600; font-size: 1rem;">Value Variance Analysis &mdash; PO vs Invoice</h4>
+          <div class="chart-container">
+            <canvas id="valueChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h4 style="font-weight: 600; font-size: 1rem;">Delivery Schedule Timeline</h4>
+          <div class="chart-container">
+            <canvas id="deliveryChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dispatch Transactions Grid -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h3 class="section-title">Dispatch Transactions</h3>
+        <div class="chart-toolbar" role="group" aria-label="Transaction grid tools">
+          <label class="chart-toolbar-label" for="locFilter">Location:</label>
+          <select id="locFilter" class="chart-select" aria-label="Filter by location">
+            <option value="all" selected>All Locations</option>
+          </select>
+          <label class="chart-toolbar-label" for="channelFilter">Channel:</label>
+          <select id="channelFilter" class="chart-select" aria-label="Filter by channel">
+            <option value="all" selected>All Channels</option>
+          </select>
+          <span class="chart-toolbar-sep" aria-hidden="true"></span>
+          <span id="recordCount" class="chart-toolbar-label" style="text-transform: none;">0 records</span>
+          <span class="chart-toolbar-sep" aria-hidden="true"></span>
+          <button id="exportCsvBtn" class="btn btn-secondary" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Export CSV / Excel
+          </button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-responsive">
+          <table class="data-table" id="logisticsTable">
+            <thead>
+              <tr>
+                <th class="sortable" data-sort="dispatchDate"><button type="button" class="th-sort">Dispatch Date<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="channel"><button type="button" class="th-sort">Channel<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="location"><button type="button" class="th-sort">Location<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="poNumber"><button type="button" class="th-sort">PO Number<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="poQty"><button type="button" class="th-sort">PO Qty<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="dispatchQty"><button type="button" class="th-sort">Dispatch Qty<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="poValue"><button type="button" class="th-sort">PO Value<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="invoiceValue"><button type="button" class="th-sort">Invoice Value<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="deliveryDate"><button type="button" class="th-sort">Delivery Date<span class="sort-arrow"></span></button></th>
+                <th class="sortable" data-sort="fulfillRate"><button type="button" class="th-sort">Fulfill Rate in %<span class="sort-arrow"></span></button></th>
+              </tr>
+            </thead>
+            <tbody id="logisticsTableBody">
+              <!-- Dynamically filled via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <span id="footerText">Supply Chain &amp; Warehouse Management | B2B &amp; B2C Daily Logistics &amp; Order Dispatch Report</span>
+      <span>Page 1 of 1</span>
+    </footer>
+
+  </div>
+
+  <!-- JavaScript Application -->
+  <script src="src/js/chart-sizing.js"></script>
+  <script src="src/js/date-filter.js"></script>
+  <script src="src/js/logistics.js"></script>
+
+</body>
+</html>

@@ -653,7 +653,7 @@ html, body {
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
   height: 100%;
 }
 
@@ -672,6 +672,37 @@ html, body {
 
 .chart-card-full {
   grid-column: 1 / -1;
+}
+
+.logistics-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .logistics-chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Conditional formatting for Fulfill Rate cells */
+.fulfill-good {
+  background-color: rgba(34, 197, 94, 0.16) !important;
+  color: var(--accent-green) !important;
+  font-weight: 700;
+}
+
+.fulfill-warn {
+  background-color: rgba(251, 191, 36, 0.16) !important;
+  color: var(--accent-orange) !important;
+  font-weight: 700;
+}
+
+.fulfill-bad {
+  background-color: rgba(248, 113, 113, 0.16) !important;
+  color: var(--accent-red) !important;
+  font-weight: 700;
 }
 
 @media (max-width: 900px) {
@@ -787,6 +818,36 @@ html, body {
 .chart-select option {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
+}
+
+.chart-count-input {
+  flex: none;
+  width: 68px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: transparent;
+  border: 1px solid var(--card-border);
+  cursor: text;
+  transition: var(--transition-fast);
+}
+
+.chart-count-input:hover {
+  border-color: var(--card-hover-border);
+}
+
+.chart-count-input:focus-visible {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(var(--accent-blue-rgb), 0.2);
+}
+
+.chart-count-input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 [data-theme="light"] .chart-select {
@@ -1314,6 +1375,20 @@ dialog.dialog-import-preview {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
+}
+
+.overview-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.overview-chart-grid .chart-card {
+  height: 100%;
+}
+
+.overview-chart-grid .chart-container {
+  height: 220px;
 }
 
 .summary-tile {
