@@ -80,11 +80,31 @@ function initApp() {
   updateThemeIcon();
 
   setupEventListeners();
+
+  // Date range filter (defaults to latest day; rest stays saved in cloud)
+  if (window.DateFilter) {
+    DateFilter.init({ onApply: () => renderDashboard() });
+  }
+
   renderDashboard();
+
+  // Pull cloud data into LocalStorage (falls back silently when offline)
+  syncFromCloud();
 }
 
 function saveState() {
   localStorage.setItem("rtv_entries_v1", JSON.stringify(state.entries));
+  if (window.DataService) DataService.push("RTV", state.entries);
+}
+
+async function syncFromCloud() {
+  if (!window.DataService || !DataService.ready) return;
+  const merged = await DataService.syncTable("RTV", state.entries);
+  if (merged) {
+    state.entries = merged;
+    saveState();
+    renderDashboard();
+  }
 }
 
 // Set up UI Interaction Event Listeners
@@ -357,7 +377,11 @@ function updateThemeIcon() {
 // Global reference for Chart.js instances
 const chartInstances = {};
 
-function buildChart(canvasId, type, labels, datasets, isDark, tooltipLabel, legendPosition) {
+if (typeof ChartDataLabels !== "undefined") {
+  Chart.register(ChartDataLabels);
+}
+
+function buildChart(canvasId, type, labels, datasets, isDark, tooltipLabel, legendPosition, dataLabelFormatter) {
   const ctx = document.getElementById(canvasId).getContext("2d");
 
   if (chartInstances[canvasId]) {
@@ -391,6 +415,13 @@ function buildChart(canvasId, type, labels, datasets, isDark, tooltipLabel, lege
         bodyColor: isDark ? "#9ca3af" : "#475569",
         borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
         borderWidth: 1
+      },
+      datalabels: {
+        color: singleSeries ? "#ffffff" : (isDark ? "#e5e7eb" : "#0f172a"),
+        font: { family: "Inter", weight: "bold", size: 11 },
+        anchor: singleSeries ? "center" : "end",
+        align: singleSeries ? "center" : "end",
+        formatter: dataLabelFormatter || ((value) => (typeof value === "number" ? value.toLocaleString() : String(value ?? "")))
       }
     },
     scales: isCartesian ? {
@@ -472,7 +503,7 @@ function renderWarehouseChart() {
     const qty = qtyByLabel[label];
     const pct = pcts[idx];
     return `${label}: ${pct.toFixed(2)}% (${qty.toLocaleString()} units)`;
-  });
+  }, null, (value) => `${value.toFixed(1)}%`);
 }
 
 function renderChannelChart() {
@@ -612,6 +643,12 @@ function getEntrySortValue(entry, key) {
 }
 
 function renderDashboard() {
+  const allEntries = state.entries;
+  if (window.DateFilter) {
+    state.entries = DateFilter.apply(allEntries, s => s.receiveDate);
+    DateFilter.setCount(state.entries.length, allEntries.length);
+  }
+  try {
   const kpi = calculateKPIs();
 
   // 1. Update KPI UI values
@@ -707,6 +744,9 @@ function renderDashboard() {
   renderWarehouseChart();
   renderChannelChart();
   renderStatusCharts();
+  } finally {
+    state.entries = allEntries;
+  }
 }
 
 function renderRootCauseAnalysis(kpi) {

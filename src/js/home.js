@@ -54,9 +54,19 @@
   }
 
   function render() {
-    const stores = read("warehouse_dashboard_stores_v2");
-    const items = read("inventory_cycle_count_stores_v3");
-    const entries = read("rtv_entries_v1");
+    let stores = read("warehouse_dashboard_stores_v2") || [];
+    let items = read("inventory_cycle_count_stores_v3") || [];
+    let entries = read("rtv_entries_v1") || [];
+    const manualWork = read("daily_work_entries_v1") || [];
+
+    if (window.DateFilter) {
+      const rawTotal = stores.length + items.length + entries.length + manualWork.length;
+      stores = DateFilter.apply(stores, s => s.dispatchDate || s.poDate);
+      items = DateFilter.apply(items, s => s.countDate);
+      entries = DateFilter.apply(entries, s => s.receiveDate);
+      const filteredManual = DateFilter.apply(manualWork, m => m.date);
+      DateFilter.setCount(stores.length + items.length + entries.length + filteredManual.length, rawTotal);
+    }
 
     // ---- Store Dispatch ----
     if (stores && stores.length > 0) {
@@ -113,7 +123,6 @@
     }
 
     // ---- Daily Work Report ----
-    const manualWork = read("daily_work_entries_v1") || [];
     const totalWork = (stores ? stores.length : 0) + (items ? items.length : 0) + (entries ? entries.length : 0) + manualWork.length;
     const unitsHandled = (stores ? stores.reduce((a, s) => a + (s.sentQty || 0), 0) : 0) +
       (items ? items.reduce((a, s) => a + (s.physicalQty || 0), 0) : 0) +
@@ -130,5 +139,34 @@
   }
 
   applyTheme();
+
+  // Date range filter (defaults to latest day; rest stays saved in cloud)
+  if (window.DateFilter) {
+    DateFilter.init({ onApply: () => render() });
+  }
+
   render();
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => render());
+  }
+
+  // Pull cloud data into LocalStorage (falls back silently when offline)
+  (async function syncFromCloud() {
+    if (!window.DataService || !DataService.ready) return;
+    const mapping = {
+      STORE_DISPATCH: "warehouse_dashboard_stores_v2",
+      INVENTORY: "inventory_cycle_count_stores_v3",
+      RTV: "rtv_entries_v1"
+    };
+    let changed = false;
+    for (const [table, key] of Object.entries(mapping)) {
+      const merged = await DataService.syncTable(table, read(key) || []);
+      if (merged) {
+        localStorage.setItem(key, JSON.stringify(merged));
+        changed = true;
+      }
+    }
+    if (changed) render();
+  })();
 })();

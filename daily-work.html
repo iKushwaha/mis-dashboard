@@ -10,6 +10,8 @@
 
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js Data Labels Plugin CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <!-- SheetJS CDN (CSV/XLSX parsing) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -209,6 +211,10 @@
           <input type="search" id="workSearch" class="chart-select" placeholder="Search task..." aria-label="Search work log" style="min-width: 170px;">
           <span class="chart-toolbar-sep" aria-hidden="true"></span>
           <span id="workCountLabel" class="chart-toolbar-label" style="text-transform: none;">0 items</span>
+          <button id="restoreHiddenBtn" class="btn btn-secondary" style="display: none;" title="Restore deleted synced rows">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+            Restore deleted (<span id="restoreHiddenCount">0</span>)
+          </button>
         </div>
       </div>
       <div class="table-card">
@@ -293,8 +299,15 @@
           <option value="Packing &amp; Labelling">Packing &amp; Labelling</option>
           <option value="Putaway / Staging">Putaway / Staging</option>
           <option value="Dispatch Documentation">Dispatch Documentation</option>
+          <option value="Picklist">Picklist</option>
+          <option value="Delivery Challan">Delivery Challan</option>
           <option value="Other">Other</option>
         </select>
+      </div>
+
+      <div class="form-group" id="workTypeOtherGroup" style="display: none;">
+        <label for="workTypeOther">Specify Work Type</label>
+        <input type="text" id="workTypeOther" class="form-control" placeholder="e.g. Cycle Audit" maxlength="60">
       </div>
 
       <div class="form-group">
@@ -340,6 +353,11 @@
 
   <!-- JavaScript Application -->
   <script src="src/js/data-import.js"></script>
+  <script src="src/js/chart-sizing.js"></script>
+  <script src="src/js/date-filter.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="src/js/supabase-config.js"></script>
+  <script src="src/js/data-service.js"></script>
   <script src="src/js/daily-work.js"></script>
 
 </body>

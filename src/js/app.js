@@ -162,12 +162,31 @@ function initApp() {
   // Setup Event Listeners
   setupEventListeners();
 
+  // Date range filter (defaults to latest day; rest stays saved in cloud)
+  if (window.DateFilter) {
+    DateFilter.init({ onApply: () => renderDashboard() });
+  }
+
   // Render Everything
   renderDashboard();
+
+  // Pull cloud data into LocalStorage (falls back silently when offline)
+  syncFromCloud();
 }
 
 function saveState() {
   localStorage.setItem("warehouse_dashboard_stores_v2", JSON.stringify(state.stores));
+  if (window.DataService) DataService.push("STORE_DISPATCH", state.stores);
+}
+
+async function syncFromCloud() {
+  if (!window.DataService || !DataService.ready) return;
+  const merged = await DataService.syncTable("STORE_DISPATCH", state.stores);
+  if (merged) {
+    state.stores = merged;
+    saveState();
+    renderDashboard();
+  }
 }
 
 // ===== Photo Gallery =====
@@ -920,6 +939,10 @@ function buildChartData() {
   };
 }
 
+if (typeof ChartDataLabels !== "undefined") {
+  Chart.register(ChartDataLabels);
+}
+
 function renderChart() {
   const ctx = document.getElementById("dispatchChart").getContext("2d");
 
@@ -1026,6 +1049,13 @@ function renderChart() {
         bodyColor: isDark ? "#9ca3af" : "#475569",
         borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
         borderWidth: 1
+      },
+      datalabels: {
+        color: singleSeries ? "#ffffff" : (isDark ? "#e5e7eb" : "#0f172a"),
+        font: { family: "Inter", weight: "bold", size: 11 },
+        anchor: singleSeries || isStacked ? "center" : "end",
+        align: singleSeries || isStacked ? "center" : (isLine ? "top" : "end"),
+        formatter: (value) => (typeof value === "number" ? value.toLocaleString() : String(value ?? ""))
       }
     },
     scales: isCartesian ? {
@@ -1534,6 +1564,12 @@ function getStoreSortValue(store, key) {
 }
 
 function renderDashboard() {
+  const allStores = state.stores;
+  if (window.DateFilter) {
+    state.stores = DateFilter.apply(allStores, s => s.dispatchDate || s.poDate);
+    DateFilter.setCount(state.stores.length, allStores.length);
+  }
+  try {
   const kpi = calculateKPIs();
 
   // 1. Update KPI UI values
@@ -1663,6 +1699,9 @@ function renderDashboard() {
   // 6. Draw Chart
   renderChart();
   syncChartControls();
+  } finally {
+    state.stores = allStores;
+  }
 }
 
 function renderRootCauseAnalysis(kpi) {

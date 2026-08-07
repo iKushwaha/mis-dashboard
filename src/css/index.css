@@ -663,10 +663,10 @@ html, body {
   width: 100%;
 }
 
-/* Chart Grid Layout (RTV) */
+/* Chart Grid Layout (RTV) — each chart spans the full dashboard width */
 .chart-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 20px;
 }
 
@@ -793,6 +793,44 @@ html, body {
   background-color: var(--bg-primary);
 }
 
+.chart-size-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.chart-size-field {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.chart-size-field span {
+  min-width: 14px;
+  text-align: center;
+}
+
+.chart-size-field input[type="range"] {
+  width: 90px;
+  accent-color: var(--accent-blue);
+  cursor: pointer;
+}
+
+@media (max-width: 1200px) {
+  .chart-size-control {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0;
+    margin-top: 4px;
+  }
+}
+
 .btn-filter {
   padding: 7px 16px;
   border-radius: 100px;
@@ -815,6 +853,83 @@ html, body {
   border-color: transparent;
   color: #ffffff;
   box-shadow: 0 2px 10px rgba(34, 197, 94, 0.3);
+}
+
+/* Date Range Filter Bar */
+.date-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  margin: 12px 0 4px;
+  background-color: var(--card-bg, var(--bg-secondary));
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg, 12px);
+}
+
+.date-filter-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.date-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.date-filter-chip {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.date-filter-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.date-filter-field input[type="date"] {
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  background-color: transparent;
+  border: 1px solid var(--card-border);
+}
+
+.date-filter-field input[type="date"]:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.date-filter-field input[type="date"]:focus-visible {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(var(--accent-blue-rgb), 0.2);
+}
+
+.date-filter-count {
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .date-filter-count {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 /* Analysis Listing Cards */

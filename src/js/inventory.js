@@ -265,11 +265,31 @@ function initApp() {
   updateThemeIcon();
 
   setupEventListeners();
+
+  // Date range filter (defaults to latest day; rest stays saved in cloud)
+  if (window.DateFilter) {
+    DateFilter.init({ onApply: () => renderDashboard() });
+  }
+
   renderDashboard();
+
+  // Pull cloud data into LocalStorage (falls back silently when offline)
+  syncFromCloud();
 }
 
 function saveState() {
   localStorage.setItem("inventory_cycle_count_stores_v3", JSON.stringify(state.items));
+  if (window.DataService) DataService.push("INVENTORY", state.items);
+}
+
+async function syncFromCloud() {
+  if (!window.DataService || !DataService.ready) return;
+  const merged = await DataService.syncTable("INVENTORY", state.items);
+  if (merged) {
+    state.items = merged;
+    saveState();
+    renderDashboard();
+  }
 }
 
 // Set up UI Interaction Event Listeners
@@ -587,6 +607,10 @@ function updateThemeIcon() {
 // Global reference for Chart.js instance
 let varianceChartInstance = null;
 
+if (typeof ChartDataLabels !== "undefined") {
+  Chart.register(ChartDataLabels);
+}
+
 function renderChart() {
   const ctx = document.getElementById("varianceChart").getContext("2d");
 
@@ -704,6 +728,13 @@ function renderChart() {
         bodyColor: isDark ? "#9ca3af" : "#475569",
         borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
         borderWidth: 1
+      },
+      datalabels: {
+        color: singleSeries ? "#ffffff" : (isDark ? "#e5e7eb" : "#0f172a"),
+        font: { family: "Inter", weight: "bold", size: 11 },
+        anchor: singleSeries ? "center" : "end",
+        align: singleSeries ? "center" : (isLine ? "top" : "end"),
+        formatter: (value) => (typeof value === "number" ? value.toLocaleString() : String(value ?? ""))
       }
     },
     scales: isCartesian ? {
@@ -818,6 +849,12 @@ window.deleteItem = function(id) {
 };
 
 function renderDashboard() {
+  const allItems = state.items;
+  if (window.DateFilter) {
+    state.items = DateFilter.apply(allItems, s => s.countDate);
+    DateFilter.setCount(state.items.length, allItems.length);
+  }
+  try {
   const kpi = calculateKPIs();
 
   // 1. Update KPI UI values
@@ -962,6 +999,9 @@ function renderDashboard() {
 
   // 6. Draw Chart
   renderChart();
+  } finally {
+    state.items = allItems;
+  }
 }
 
 function renderRootCauseAnalysis(kpi) {

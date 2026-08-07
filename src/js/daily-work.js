@@ -1,9 +1,12 @@
 // Daily Work Report — aggregates work from Store Dispatch, Inventory Cycle Count,
 // RTV, and manual work entries into a single dynamic daily operations dashboard.
 const DAILY_WORK_STORAGE_KEY = "daily_work_entries_v1";
+const DAILY_WORK_OVERRIDE_KEY = "daily_work_overrides_v1";
+const DAILY_WORK_HIDDEN_KEY = "daily_work_hidden_v1";
 
 const WORK_STATUSES = ["COMPLETED", "IN PROGRESS", "PENDING"];
 const WORK_REPORTS = ["STORE DISPATCH", "INVENTORY", "RTV", "MANUAL"];
+const WORK_TYPE_OPTIONS = ["Dispatch", "Cycle Count", "Return Processing", "Quality Check", "Packing & Labelling", "Putaway / Staging", "Dispatch Documentation", "Picklist", "Delivery Challan"];
 
 const REPORT_SOURCES = {
   STORE_DISPATCH: "warehouse_dashboard_stores_v2",
@@ -24,7 +27,9 @@ let state = {
   assigneeFilter: "all",
   search: "",
   sortKey: "date",
-  sortDir: "desc"
+  sortDir: "desc",
+  overrides: {},
+  hidden: []
 };
 
 // SVG Icon Helpers
@@ -32,7 +37,8 @@ const SVG_ICONS = {
   edit: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
   delete: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`,
   sun: `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`,
-  moon: `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`
+  moon: `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`,
+  revert: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`
 };
 
 // ---- Utilities ----
@@ -92,9 +98,9 @@ function mapRtvStatus(entry) {
 }
 
 // ---- Auto-derive work items from other reports ----
-function storeToWork(s) {
+function storeToWork(s, i) {
   return {
-    id: "auto-sd-" + (s.id || Math.random().toString(36).slice(2)),
+    id: "auto-sd-" + (s.id || "idx-" + i),
     report: "STORE DISPATCH",
     workType: "Dispatch",
     task: `Dispatch to ${s.storeName}`,
@@ -107,10 +113,10 @@ function storeToWork(s) {
   };
 }
 
-function inventoryToWork(item) {
+function inventoryToWork(item, i) {
   const variance = (item.physicalQty || 0) - (item.systemQty || 0);
   return {
-    id: "auto-inv-" + (item.id || Math.random().toString(36).slice(2)),
+    id: "auto-inv-" + (item.id || "idx-" + i),
     report: "INVENTORY",
     workType: "Cycle Count",
     task: `Cycle count - ${item.itemName}${item.binLocation ? ` (${item.binLocation})` : ""}`,
@@ -123,9 +129,9 @@ function inventoryToWork(item) {
   };
 }
 
-function rtvToWork(entry) {
+function rtvToWork(entry, i) {
   return {
-    id: "auto-rtv-" + (entry.id || Math.random().toString(36).slice(2)),
+    id: "auto-rtv-" + (entry.id || "idx-" + i),
     report: "RTV",
     workType: "Return Processing",
     task: `Return processing - ${entry.warehouseLocation}`,
@@ -138,12 +144,25 @@ function rtvToWork(entry) {
   };
 }
 
-function collectWorkItems() {
-  const stores = read(REPORT_SOURCES.STORE_DISPATCH).map(storeToWork);
-  const items = read(REPORT_SOURCES.INVENTORY).map(inventoryToWork);
-  const entries = read(REPORT_SOURCES.RTV).map(rtvToWork);
+function applyOverrides(items) {
+  return items.map(item => {
+    const ov = state.overrides[item.id];
+    return ov ? { ...item, ...ov, override: true } : item;
+  });
+}
+
+function collectRawWorkItems() {
+  const stores = read(REPORT_SOURCES.STORE_DISPATCH).map((s, i) => storeToWork(s, i));
+  const items = read(REPORT_SOURCES.INVENTORY).map((item, i) => inventoryToWork(item, i));
+  const entries = read(REPORT_SOURCES.RTV).map((entry, i) => rtvToWork(entry, i));
   const manual = state.manual.map(m => ({ ...m, source: "manual" }));
-  return [...stores, ...items, ...entries, ...manual];
+  const all = applyOverrides([...stores, ...items, ...entries, ...manual]);
+  return all.filter(i => !state.hidden.includes(i.id));
+}
+
+function collectWorkItems() {
+  const raw = collectRawWorkItems();
+  return window.DateFilter ? DateFilter.apply(raw, i => i.date) : raw;
 }
 
 // ---- KPIs ----
@@ -211,10 +230,17 @@ function buildChartData(items) {
   return { labels, count: labels.map(l => groups[l].count), qty: labels.map(l => groups[l].qty) };
 }
 
+if (typeof ChartDataLabels !== "undefined") {
+  Chart.register(ChartDataLabels);
+}
+
 function renderChart() {
   const ctx = document.getElementById("workChart");
   if (!ctx) return;
-  if (workChartInstance) workChartInstance.destroy();
+  try {
+    if (workChartInstance) workChartInstance.destroy();
+  } catch (e) { /* ignore stale instances */ }
+  workChartInstance = null;
 
   const isDark = state.theme === "dark";
   const gridColor = isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(15, 23, 42, 0.08)";
@@ -236,30 +262,45 @@ function renderChart() {
     ? { dark: "rgba(45, 212, 191, 0.8)", light: "rgba(13, 148, 136, 0.85)", border: "var(--accent-blue)" }
     : { dark: "rgba(163, 230, 53, 0.85)", light: "rgba(77, 124, 15, 0.85)", border: "var(--accent-indigo)" };
 
+  const isHorizontal = chartType === "horizontalBar";
+  const isStacked = chartType === "stackedBar";
+  const isLine = chartType === "line";
+  const isCartesian = ["bar", "horizontalBar", "stackedBar", "line"].includes(chartType);
+
+  const effectiveType = isLine ? "line" : (isHorizontal || isStacked ? "bar" : chartType);
+
+  const labelColors = data.labels.map((_, i) => palette[i % palette.length]);
+
   let datasets;
   if (singleSeries) {
     datasets = [{
       label: chartMetricLabel(metric),
       data: metricData[metric],
-      backgroundColor: data.labels.map((_, i) => palette[i % palette.length]),
+      backgroundColor: labelColors,
       borderColor: "rgba(15, 23, 42, 0.35)",
       borderWidth: 1
+    }];
+  } else if (isLine) {
+    datasets = [{
+      label: chartMetricLabel(metric),
+      data: metricData[metric],
+      fill: false,
+      tension: 0.3,
+      borderWidth: 2,
+      pointRadius: 3,
+      borderColor: color.border,
+      backgroundColor: isDark ? color.dark : color.light
     }];
   } else {
     datasets = [{
       label: chartMetricLabel(metric),
       data: metricData[metric],
-      backgroundColor: isDark ? color.dark : color.light,
-      borderColor: color.border,
+      backgroundColor: labelColors,
+      borderColor: labelColors.map(c => c),
       borderWidth: 1,
       borderRadius: 4
     }];
   }
-
-  const isHorizontal = chartType === "horizontalBar";
-  const isStacked = chartType === "stackedBar";
-  const isLine = chartType === "line";
-  const isCartesian = ["bar", "horizontalBar", "stackedBar", "line"].includes(chartType);
 
   const options = {
     responsive: true,
@@ -278,6 +319,13 @@ function renderChart() {
         bodyColor: isDark ? "#9ca3af" : "#475569",
         borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
         borderWidth: 1
+      },
+      datalabels: {
+        color: singleSeries ? "#ffffff" : (isDark ? "#e5e7eb" : "#0f172a"),
+        font: { family: "Inter", weight: "bold", size: 11 },
+        anchor: singleSeries || isStacked ? "center" : "end",
+        align: singleSeries || isStacked ? "center" : (isLine ? "top" : "end"),
+        formatter: (value) => (typeof value === "number" ? value.toLocaleString() : String(value ?? ""))
       }
     },
     scales: isCartesian ? {
@@ -290,16 +338,16 @@ function renderChart() {
     } : undefined
   };
 
-  if (isLine) {
-    datasets[0].fill = false;
-    datasets[0].tension = 0.3;
+  try {
+    workChartInstance = new Chart(ctx, {
+      type: effectiveType,
+      data: { labels: data.labels, datasets },
+      options
+    });
+  } catch (err) {
+    console.error("Chart render failed:", err);
+    workChartInstance = null;
   }
-
-  workChartInstance = new Chart(ctx, {
-    type: isLine ? "line" : (isStacked ? "bar" : chartType),
-    data: { labels: data.labels, datasets },
-    options
-  });
 }
 
 function syncChartControls() {
@@ -349,6 +397,14 @@ function renderTable() {
 
   countLabel.innerText = `${filtered.length} of ${all.length} items`;
 
+  const restoreBtn = document.getElementById("restoreHiddenBtn");
+  if (restoreBtn) {
+    const n = state.hidden.length;
+    restoreBtn.style.display = n > 0 ? "" : "none";
+    const countEl = document.getElementById("restoreHiddenCount");
+    if (countEl) countEl.innerText = n;
+  }
+
   // Rebuild assignee filter options (preserve selection)
   const assignees = [...new Set(all.map(i => i.assignee).filter(Boolean))].sort();
   assigneeFilter.innerHTML = `<option value="all" selected>All Assignees</option>` +
@@ -389,12 +445,17 @@ function renderTable() {
       <td><span class="badge ${statusBadgeClass(item.status)}">${escapeHtml(item.status)}</span></td>
       <td>${isManual
         ? '<span class="tag-badge" style="background-color: rgba(96, 165, 250, 0.12); color: #60a5fa; border-color: rgba(96, 165, 250, 0.3);">MANUAL</span>'
-        : '<span class="tag-badge" style="background-color: rgba(45, 212, 191, 0.12); color: var(--accent-blue); border-color: rgba(45, 212, 191, 0.3);">SYNCED</span>'}</td>
+        : '<span class="tag-badge" style="background-color: rgba(45, 212, 191, 0.12); color: var(--accent-blue); border-color: rgba(45, 212, 191, 0.3);">SYNCED</span>' + (item.override
+          ? ' <span class="tag-badge" style="background-color: rgba(251, 191, 36, 0.12); color: var(--accent-orange); border-color: rgba(251, 191, 36, 0.3);">EDITED</span>'
+          : '')}</td>
       <td title="${escapeHtml(item.notes || "")}">${escapeHtml(notes)}</td>
-      <td class="table-actions">${isManual
-        ? `<button class="btn btn-secondary btn-icon" title="Edit work entry" onclick="openWorkDialog('${item.id}')">${SVG_ICONS.edit}</button>
-           <button class="btn btn-danger btn-icon" title="Delete work entry" onclick="deleteWork('${item.id}')">${SVG_ICONS.delete}</button>`
-        : `<span style="color: var(--text-muted); font-size: 0.75rem;">auto</span>`}</td>
+      <td class="table-actions">
+        <button class="btn btn-secondary btn-icon" title="${isManual ? "Edit work entry" : "Edit synced work (overrides this copy)"}" onclick="openWorkDialog('${item.id}')">${SVG_ICONS.edit}</button>
+        ${!isManual && item.override
+          ? `<button class="btn btn-secondary btn-icon" title="Revert to original synced data" onclick="revertWork('${item.id}')">${SVG_ICONS.revert}</button>`
+          : ""}
+        <button class="btn btn-danger btn-icon" title="${isManual ? "Delete work entry" : "Remove from Daily Work view"}" onclick="deleteWork('${item.id}')">${SVG_ICONS.delete}</button>
+      </td>
     `;
     tableBody.appendChild(tr);
   });
@@ -527,7 +588,9 @@ function renderRecommendations(items) {
 
 // ---- Render ----
 function renderDashboard() {
-  const items = collectWorkItems();
+  const raw = collectRawWorkItems();
+  const items = window.DateFilter ? DateFilter.apply(raw, i => i.date) : raw;
+  if (window.DateFilter) DateFilter.setCount(items.length, raw.length);
 
   renderKPIs(computeKPIs(items));
   renderChart();
@@ -548,6 +611,50 @@ function loadManual() {
   state.manual = read(DAILY_WORK_STORAGE_KEY);
 }
 
+function loadOverrides() {
+  try {
+    const raw = localStorage.getItem(DAILY_WORK_OVERRIDE_KEY);
+    state.overrides = raw ? JSON.parse(raw) : {};
+    if (!state.overrides || typeof state.overrides !== "object" || Array.isArray(state.overrides)) state.overrides = {};
+  } catch (e) {
+    state.overrides = {};
+  }
+}
+
+function saveOverrides() {
+  try {
+    localStorage.setItem(DAILY_WORK_OVERRIDE_KEY, JSON.stringify(state.overrides));
+  } catch (e) {
+    console.error("Could not persist work overrides.", e);
+    alert("Override could not be saved because browser storage is full.");
+  }
+}
+
+function loadHidden() {
+  try {
+    const raw = localStorage.getItem(DAILY_WORK_HIDDEN_KEY);
+    state.hidden = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(state.hidden)) state.hidden = [];
+  } catch (e) {
+    state.hidden = [];
+  }
+}
+
+function saveHidden() {
+  try {
+    localStorage.setItem(DAILY_WORK_HIDDEN_KEY, JSON.stringify(state.hidden));
+  } catch (e) {
+    console.error("Could not persist hidden rows.", e);
+  }
+}
+
+function restoreHidden() {
+  if (!confirm(`Restore ${state.hidden.length} deleted synced row${state.hidden.length !== 1 ? "s" : ""} back to the Daily Work view?`)) return;
+  state.hidden = [];
+  saveHidden();
+  renderDashboard();
+}
+
 function saveManual() {
   try {
     localStorage.setItem(DAILY_WORK_STORAGE_KEY, JSON.stringify(state.manual));
@@ -557,13 +664,42 @@ function saveManual() {
     state.manual.pop();
     renderDashboard();
   }
+  if (window.DataService) DataService.push("DAILY_WORK", state.manual);
 }
 
-// ---- Manual entry CRUD ----
+async function syncFromCloud() {
+  if (!window.DataService || !DataService.ready) return;
+  const merged = await DataService.syncTable("DAILY_WORK", state.manual);
+  if (merged) {
+    state.manual = merged;
+    saveManual();
+    renderDashboard();
+  }
+}
+
+// ---- Work entry CRUD (manual + synced overrides) ----
+function syncWorkTypeOtherField() {
+  const select = document.getElementById("workType");
+  const group = document.getElementById("workTypeOtherGroup");
+  const input = document.getElementById("workTypeOther");
+  const isOther = select.value === "Other";
+  if (group) group.style.display = isOther ? "" : "none";
+  if (input && !isOther) input.value = "";
+}
+
+function readWorkType() {
+  let value = document.getElementById("workType").value;
+  if (value === "Other") {
+    value = document.getElementById("workTypeOther").value.trim() || "Other";
+  }
+  return value;
+}
+
 function openWorkDialog(id) {
   const dialog = document.getElementById("workDialog");
   const form = document.getElementById("workForm");
   state.editingId = id || null;
+  state.editingSource = "manual";
   form.reset();
 
   const today = todayISO();
@@ -571,13 +707,24 @@ function openWorkDialog(id) {
   document.getElementById("workStatus").value = "PENDING";
   document.getElementById("workAssignee").value = "Pushpendra";
 
-  document.getElementById("workDialogTitle").innerText = id ? "Edit Work Entry" : "Add Work Entry";
-  document.getElementById("formWorkId").value = id || "";
-
   if (id) {
-    const item = state.manual.find(m => m.id === id);
+    const item = collectWorkItems().find(i => i.id === id);
+    state.editingSource = item && item.source !== "manual" ? "auto" : "manual";
+    document.getElementById("workDialogTitle").innerText = state.editingSource === "auto"
+      ? "Edit Work Entry (Synced Override)"
+      : "Edit Work Entry";
     if (item) {
-      document.getElementById("workType").value = item.workType || "Other";
+      document.getElementById("formWorkId").value = item.id;
+      const wt = item.workType || "Other";
+      const typeSelect = document.getElementById("workType");
+      const otherInput = document.getElementById("workTypeOther");
+      if (WORK_TYPE_OPTIONS.includes(wt)) {
+        typeSelect.value = wt;
+        otherInput.value = "";
+      } else {
+        typeSelect.value = "Other";
+        otherInput.value = wt;
+      }
       document.getElementById("workTask").value = item.task || "";
       document.getElementById("workAssignee").value = item.assignee || "";
       document.getElementById("workDate").value = item.date || today;
@@ -585,23 +732,43 @@ function openWorkDialog(id) {
       document.getElementById("workStatus").value = item.status || "PENDING";
       document.getElementById("workNotes").value = item.notes || "";
     }
+  } else {
+    document.getElementById("workDialogTitle").innerText = "Add Work Entry";
+    document.getElementById("formWorkId").value = "";
   }
 
+  syncWorkTypeOtherField();
   dialog.showModal();
 }
 
+function revertWork(id) {
+  if (!confirm("Revert this row to the original data synced from its report? Your edits on this copy will be discarded.")) return;
+  delete state.overrides[id];
+  saveOverrides();
+  renderDashboard();
+}
+
 function deleteWork(id) {
-  if (!confirm("Delete this manual work entry? Synced items from other reports cannot be deleted here.")) return;
-  state.manual = state.manual.filter(m => m.id !== id);
-  saveManual();
+  const item = collectWorkItems().find(i => i.id === id);
+  if (item && item.source === "manual") {
+    if (!confirm("Delete this manual work entry?")) return;
+    state.manual = state.manual.filter(m => m.id !== id);
+    saveManual();
+  } else {
+    if (!confirm("Remove this synced row from the Daily Work Report view? It stays in its source report and can be restored later.")) return;
+    if (!state.hidden.includes(id)) state.hidden.push(id);
+    delete state.overrides[id];
+    saveHidden();
+    saveOverrides();
+  }
   renderDashboard();
 }
 
 function exportCsv() {
   let csv = "data:text/csv;charset=utf-8,";
-  csv += "Work Type,Task,Assignee,Date,Qty,Status,Notes\n";
-  state.manual.forEach(m => {
-    csv += [`"${m.workType || ""}"`, `"${m.task || ""}"`, `"${m.assignee || ""}"`, `"${m.date || ""}"`, m.qty || 0, `"${m.status || ""}"`, `"${m.notes || ""}"`].join(",") + "\n";
+  csv += "Report,Work Type,Task,Assignee,Date,Qty,Status,Source,Notes\n";
+  collectWorkItems().forEach(m => {
+    csv += [`"${m.report || ""}"`, `"${m.workType || ""}"`, `"${m.task || ""}"`, `"${m.assignee || ""}"`, `"${m.date || ""}"`, m.qty || 0, `"${m.status || ""}"`, `"${m.override ? "SYNCED (EDITED)" : (m.source === "manual" ? "MANUAL" : "SYNCED")}"`, `"${m.notes || ""}"`].join(",") + "\n";
   });
   const a = document.createElement("a");
   a.setAttribute("href", encodeURI(csv));
@@ -690,19 +857,45 @@ function setupEventListeners() {
 
   document.getElementById("refreshBtn").addEventListener("click", () => {
     loadManual();
+    loadOverrides();
+    loadHidden();
     renderDashboard();
+    const btn = document.getElementById("refreshBtn");
+    const original = btn.innerHTML;
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 22 10 16 10"></polyline></svg> Synced';
+    setTimeout(() => { btn.innerHTML = original; }, 1500);
   });
 
   document.getElementById("addWorkBtn").addEventListener("click", () => openWorkDialog(null));
+  document.getElementById("restoreHiddenBtn").addEventListener("click", restoreHidden);
+  document.getElementById("workType").addEventListener("change", syncWorkTypeOtherField);
   document.getElementById("closeWorkDialogBtn").addEventListener("click", () => dialog.close());
   document.getElementById("cancelWorkDialogBtn").addEventListener("click", () => dialog.close());
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const id = document.getElementById("formWorkId").value;
+    const isAuto = state.editingSource === "auto";
+
+    if (isAuto && id) {
+      state.overrides[id] = {
+        workType: readWorkType(),
+        task: document.getElementById("workTask").value.trim(),
+        assignee: document.getElementById("workAssignee").value.trim(),
+        date: document.getElementById("workDate").value,
+        qty: parseInt(document.getElementById("workQty").value) || 0,
+        status: document.getElementById("workStatus").value,
+        notes: document.getElementById("workNotes").value.trim() || "-"
+      };
+      saveOverrides();
+      dialog.close();
+      renderDashboard();
+      return;
+    }
+
     const entry = {
       id: id || "work-" + Date.now(),
-      workType: document.getElementById("workType").value,
+      workType: readWorkType(),
       task: document.getElementById("workTask").value.trim(),
       assignee: document.getElementById("workAssignee").value.trim(),
       date: document.getElementById("workDate").value,
@@ -735,9 +928,13 @@ function setupEventListeners() {
   document.getElementById("printBtn").addEventListener("click", () => window.print());
 
   document.getElementById("resetBtn").addEventListener("click", () => {
-    if (confirm("Erase all manual work entries? Synced items from other reports are not affected.")) {
+    if (confirm("Erase all manual work entries and revert any synced overrides? Synced items from other reports are not affected.")) {
       state.manual = [];
+      state.overrides = {};
+      state.hidden = [];
       localStorage.removeItem(DAILY_WORK_STORAGE_KEY);
+      localStorage.removeItem(DAILY_WORK_OVERRIDE_KEY);
+      localStorage.removeItem(DAILY_WORK_HIDDEN_KEY);
       renderDashboard();
     }
   });
@@ -795,8 +992,10 @@ function setupEventListeners() {
 
   // Live re-sync when any report updates (cross-tab / same-tab)
   window.addEventListener("storage", (e) => {
-    if (Object.values(REPORT_SOURCES).includes(e.key) || e.key === DAILY_WORK_STORAGE_KEY || e.key === "warehouse_dashboard_theme") {
+    if (Object.values(REPORT_SOURCES).includes(e.key) || e.key === DAILY_WORK_STORAGE_KEY || e.key === DAILY_WORK_OVERRIDE_KEY || e.key === DAILY_WORK_HIDDEN_KEY || e.key === "warehouse_dashboard_theme") {
       loadManual();
+      loadOverrides();
+      loadHidden();
       if (e.key === "warehouse_dashboard_theme") {
         state.theme = localStorage.getItem("warehouse_dashboard_theme") || "dark";
         document.documentElement.setAttribute("data-theme", state.theme);
@@ -813,8 +1012,19 @@ function initApp() {
   document.documentElement.setAttribute("data-theme", state.theme);
   updateThemeIcon();
   loadManual();
+  loadOverrides();
+  loadHidden();
   setupEventListeners();
+
+  // Date range filter (defaults to latest day; rest stays saved in cloud)
+  if (window.DateFilter) {
+    DateFilter.init({ onApply: () => renderDashboard() });
+  }
+
   renderDashboard();
+
+  // Pull cloud manual entries into LocalStorage (falls back silently when offline)
+  syncFromCloud();
 }
 
 window.addEventListener("DOMContentLoaded", initApp);
