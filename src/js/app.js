@@ -702,6 +702,7 @@ function setupEventListeners() {
 
   // Reset All Data
   resetBtn.addEventListener("click", () => {
+    return; // Reset disabled until re-enabled by owner
     if (confirm("Erase all store dispatch data and gallery photos? This cannot be undone.")) {
       state.stores = [];
       state.photos = [];

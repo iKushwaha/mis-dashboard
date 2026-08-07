@@ -19,8 +19,8 @@ let state = {
   manual: [],
   theme: "dark",
   editingId: null,
-  chartMode: "report",
-  chartType: "bar",
+  chartMode: "status",
+  chartType: "doughnut",
   chartMetric: "count",
   reportFilter: "all",
   statusFilter: "all",
@@ -246,7 +246,7 @@ function renderChart() {
   const gridColor = isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(15, 23, 42, 0.08)";
   const textColor = isDark ? "#9ca3af" : "#475569";
 
-  const chartType = state.chartType || "bar";
+  const chartType = state.chartType || "doughnut";
   const chartMetric = state.chartMetric || "count";
   const data = buildChartData(collectWorkItems());
 
@@ -928,6 +928,7 @@ function setupEventListeners() {
   document.getElementById("printBtn").addEventListener("click", () => window.print());
 
   document.getElementById("resetBtn").addEventListener("click", () => {
+    return; // Reset disabled until re-enabled by owner
     if (confirm("Erase all manual work entries and revert any synced overrides? Synced items from other reports are not affected.")) {
       state.manual = [];
       state.overrides = {};

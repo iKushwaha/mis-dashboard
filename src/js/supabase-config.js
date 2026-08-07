@@ -9,6 +9,9 @@ window.SUPABASE_CONFIG = {
     STORE_DISPATCH: "store_dispatch",
     INVENTORY: "inventory_cycle_count",
     RTV: "rtv_entries",
-    DAILY_WORK: "daily_work"
+    DAILY_WORK: "daily_work",
+    LOGISTICS_DISPATCH: "logistics_dispatch",
+    LOGISTICS_SHORT_SKU: "logistics_short_sku",
+    LOGISTICS_CONFIG: "logistics_config"
   }
 };

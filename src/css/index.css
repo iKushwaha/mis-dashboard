@@ -584,6 +584,37 @@ html, body {
   border-bottom: none;
 }
 
+/* Expandable channel detail rows */
+.channel-detail-row td {
+  padding: 0;
+  background-color: rgba(0, 0, 0, 0.14);
+  border-bottom: 1px solid var(--card-border);
+}
+
+[data-theme="light"] .channel-detail-row td {
+  background-color: rgba(0, 0, 0, 0.025);
+}
+
+.channel-detail {
+  padding: 16px 20px;
+}
+
+.channel-detail-header {
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.detail-table thead th {
+  padding: 8px 12px;
+  font-size: 0.7rem;
+}
+
+.detail-table td {
+  padding: 9px 12px;
+  font-size: 0.85rem;
+}
+
 /* Status Badges */
 .badge {
   display: inline-flex;
@@ -1150,6 +1181,21 @@ dialog.dialog-import-preview {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-secondary);
+}
+
+.config-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.config-row .form-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.config-row .btn-icon {
+  flex-shrink: 0;
 }
 
 .form-control {
@@ -1907,4 +1953,8 @@ dialog.dialog-import-preview {
   .lightbox-prev { left: 10px; }
   .lightbox-next { right: 10px; }
   .lightbox-caption { white-space: normal; text-align: center; }
+}
+
+#resetBtn {
+  display: none !important;
 }

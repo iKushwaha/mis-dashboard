@@ -31,7 +31,8 @@
           <option value="store-dispatch.html">Store Dispatch Report</option>
           <option value="inventory.html">Inventory Cycle Count Report</option>
           <option value="rtv.html">Return to Vendor/Origin Report</option>
-          <option value="logistics.html">B2B &amp; B2C Logistics &amp; Dispatch Report</option>
+          <option value="logistics.html">B2B Dispatch &amp; PO Summary Report</option>
+          <option value="dispatch-summary.html">B2C Dispatch &amp; Order Summary Report</option>
         </select>
         <button id="themeToggle" class="btn btn-secondary btn-icon" title="Toggle Theme" aria-label="Toggle dark/light theme">
           <!-- Sun/Moon icon toggle handled in JS -->
@@ -81,7 +82,7 @@
           </svg>
           Print / PDF
         </button>
-        <button id="resetBtn" class="btn btn-danger">
+        <button id="resetBtn" class="btn btn-danger" hidden>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="1 4 1 10 7 10"></polyline>
             <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
@@ -156,17 +157,17 @@
         <h3 class="section-title">Visual Analytics</h3>
         <div class="chart-toolbar" role="group" aria-label="Chart controls">
           <span class="chart-toolbar-label">View:</span>
-          <button id="filterByReport" class="btn btn-filter active" type="button">By Report</button>
-          <button id="filterByStatus" class="btn btn-filter" type="button">By Status</button>
+          <button id="filterByReport" class="btn btn-filter" type="button">By Report</button>
+          <button id="filterByStatus" class="btn btn-filter active" type="button">By Status</button>
           <button id="filterByAssignee" class="btn btn-filter" type="button">By Assignee</button>
           <span class="chart-toolbar-sep" aria-hidden="true"></span>
           <label class="chart-toolbar-label" for="chartType">Chart:</label>
           <select id="chartType" class="chart-select" aria-label="Chart type">
-            <option value="bar" selected>Bar</option>
+            <option value="bar">Bar</option>
             <option value="horizontalBar">Horizontal Bar</option>
             <option value="stackedBar">Stacked Bar</option>
             <option value="line">Line</option>
-            <option value="doughnut">Doughnut</option>
+            <option value="doughnut" selected>Doughnut</option>
             <option value="pie">Pie</option>
             <option value="polarArea">Polar Area</option>
           </select>

@@ -524,6 +524,7 @@ function setupEventListeners() {
 
   // Reset All Data
   resetBtn.addEventListener("click", () => {
+    return; // Reset disabled until re-enabled by owner
     if (confirm("Erase all inventory cycle count data? This cannot be undone.")) {
       state.items = [];
       saveState();
