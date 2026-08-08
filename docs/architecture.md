@@ -9,10 +9,10 @@ file server (`python3 -m http.server 8080`).
 | Page | Report | Logic | Storage key |
 | --- | --- | --- | --- |
 | `index.html` | Dashboard Overview / All Reports (landing) | `src/js/home.js` | reads all keys |
-| `daily-work.html` | Daily Work Report | `src/js/daily-work.js` | reads all keys + `daily_work_entries_v1` |
-| `store-dispatch.html` | Store Dispatch | `src/js/app.js` | `warehouse_dashboard_stores_v2` |
-| `inventory.html` | Inventory Cycle Count | `src/js/inventory.js` | `inventory_cycle_count_stores_v3` |
-| `rtv.html` | RTV | `src/js/rtv.js` | `rtv_entries_v1` |
+| `daily-work.html` | Daily Work Report | `src/js/daily-work.js` | reads all keys + `daily_work_entries_v3` |
+| `store-dispatch.html` | Store Dispatch | `src/js/app.js` | `warehouse_dashboard_stores_v5` |
+| `inventory.html` | Inventory Cycle Count | `src/js/inventory.js` | `inventory_cycle_count_stores_v5` |
+| `rtv.html` | RTV | `src/js/rtv.js` | `rtv_entries_v3` |
 
 All four pages stay siblings at the root so their relative links to each other
 (the report switcher dropdown and the home-page report cards) keep working.
@@ -37,17 +37,17 @@ All four pages stay siblings at the root so their relative links to each other
   Handles JSON / CSV / XLSX parsing, fuzzy header matching, row validation with
   error messages, date parsing (`DD/MM/YYYY`, ISO, Excel serials), and a preview
   dialog before anything is written to storage.
-- **`src/js/app.js`** - Store Dispatch. Owns `DEFAULT_STORES`, state, CRUD modal,
+- **`src/js/app.js`** - Store Dispatch. owns empty-by-default state, CRUD modal,
   KPI aggregation, Chart.js chart, root-cause & recommendations panels, and the
   import/export/print/reset toolbar.
-- **`src/js/inventory.js`** - Cycle Count. Owns `DEFAULT_ITEMS`, state (incl.
+- **`src/js/inventory.js`** - Cycle Count. owns empty-by-default state (incl.
   chart mode/type/metric and status/category filters), CRUD, variance analytics,
   and multiple chart renderings.
-- **`src/js/rtv.js`** - RTV. Owns `DEFAULT_ENTRIES`, state, CRUD, and channel /
+- **`src/js/rtv.js`** - RTV. owns empty-by-default state, CRUD, and channel /
   warehouse / status analytics.
 - **`src/js/daily-work.js`** - Daily Work Report. Aggregates work from all three
   source reports (Store Dispatch, Inventory, RTV) plus manual entries in
-  `daily_work_entries_v1`, derives status per source, and renders KPIs, an
+  `daily_work_entries_v3`, derives status per source, and renders KPIs, an
   interactive chart (by report / status / assignee), a filterable work log,
   team-productivity breakdowns, and recommendations. Re-syncs live via the
   `storage` event so new submissions elsewhere reflect immediately.

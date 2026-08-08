@@ -1,75 +1,4 @@
-// Default Store Dispatch Dataset (5 dummy stores for testing)
-const DEFAULT_STORES = [
-  {
-    id: "store-1",
-    storeName: "DLF Phase 1",
-    poDate: "2026-07-29",
-    dispatchDate: "2026-07-30",
-    poQty: 473,
-    sentQty: 473,
-    itemsInPo: 115,
-    verifiedPerson: "Pushpendra",
-    status: "DELIVERED",
-    reasonOfShortage: "-"
-  },
-  {
-    id: "store-2",
-    storeName: "Pacific Mall",
-    poDate: "2026-07-29",
-    dispatchDate: "2026-07-30",
-    poQty: 609,
-    sentQty: 598,
-    itemsInPo: 71,
-    verifiedPerson: "Pushpendra",
-    status: "DELIVERED",
-    reasonOfShortage: "Some Of The Item Block For Future Order",
-    shortageDetails: [
-      { sku: "SEED-BLSM-200", itemDescription: "Balsam Mix (200 Seeds)", category: "FLOWER SEED", poQty: 100, sentQty: 89, status: "PARTIAL", shortageReason: "Some Of The Item Block For Future Order", notes: "Blocked for future order" }
-    ]
-  },
-  {
-    id: "store-3",
-    storeName: "Select Citywalk",
-    poDate: "2026-07-28",
-    dispatchDate: "2026-07-30",
-    poQty: 1250,
-    sentQty: 890,
-    itemsInPo: 210,
-    verifiedPerson: "Pushpendra",
-    status: "SHORTAGE",
-    reasonOfShortage: "Material Not Arranged As Per Requested",
-    shortageDetails: [
-      { sku: "SEED-AGER-100", itemDescription: "Ageratum Flower Seeds", category: "FLOWER SEED", poQty: 500, sentQty: 300, status: "SHORTAGE", shortageReason: "Material Not Arranged As Per Requested", notes: "Awaiting vendor stock" },
-      { sku: "SEED-COR-250", itemDescription: "Coriander Seeds - 250 g", category: "SEEDS", poQty: 450, sentQty: 400, status: "PARTIAL", shortageReason: "Vendor Supply Delay", notes: "-" },
-      { sku: "SEED-ALY-200", itemDescription: "Alyssum (200 Seeds)", category: "FLOWER SEED", poQty: 300, sentQty: 190, status: "SHORTAGE", shortageReason: "Material Not Arranged As Per Requested", notes: "-" }
-    ]
-  },
-  {
-    id: "store-4",
-    storeName: "Ambience Mall",
-    poDate: "2026-07-29",
-    dispatchDate: "2026-07-30",
-    poQty: 840,
-    sentQty: 0,
-    itemsInPo: 95,
-    verifiedPerson: "Pushpendra",
-    status: "READY TO DISPATCH",
-    reasonOfShortage: "pending clearance before dispatch"
-  },
-  {
-    id: "store-5",
-    storeName: "V3S Mall",
-    poDate: "2026-07-27",
-    dispatchDate: "2026-07-30",
-    poQty: 320,
-    sentQty: 320,
-    itemsInPo: 40,
-    verifiedPerson: "Pushpendra",
-    status: "IN TRANSIT",
-    reasonOfShortage: "-"
-  }
-];
-
+// Store Dispatch data starts empty; users create their own records.
 // State Manager
 let state = {
   stores: [],
@@ -90,7 +19,7 @@ let state = {
 };
 
 // Photo gallery storage key (separate from store data)
-const PHOTO_STORAGE_KEY = "warehouse_dashboard_photos_v1";
+const PHOTO_STORAGE_KEY = "warehouse_dashboard_photos_v2";
 const PHOTO_EXTENSIONS = ["png", "jpeg", "jpg"];
 const PHOTO_MAX_DIMENSION = 1280;
 const PHOTO_JPEG_QUALITY = 0.85;
@@ -134,18 +63,29 @@ function formatDate(dateStr) {
   return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
+// Purge superseded storage keys so previously cached data is removed for good
+function purgeLegacyKeys() {
+  [
+    "warehouse_dashboard_stores_v2",
+    "warehouse_dashboard_stores_v4",
+    "warehouse_dashboard_photos_v1"
+  ].forEach(k => localStorage.removeItem(k));
+}
+
 // Load and Initialize App State
 function initApp() {
-  const savedStores = localStorage.getItem("warehouse_dashboard_stores_v2");
+  purgeLegacyKeys();
+
+  const savedStores = localStorage.getItem("warehouse_dashboard_stores_v5");
   if (savedStores) {
     try {
       state.stores = JSON.parse(savedStores);
     } catch (e) {
-      console.error("Error parsing saved stores, falling back to default.", e);
-      state.stores = [...DEFAULT_STORES];
+      console.error("Error parsing saved stores, starting with an empty set.", e);
+      state.stores = [];
     }
   } else {
-    state.stores = [...DEFAULT_STORES];
+    state.stores = [];
     saveState();
   }
 
@@ -175,7 +115,7 @@ function initApp() {
 }
 
 function saveState() {
-  localStorage.setItem("warehouse_dashboard_stores_v2", JSON.stringify(state.stores));
+  localStorage.setItem("warehouse_dashboard_stores_v5", JSON.stringify(state.stores));
   if (window.DataService) DataService.push("STORE_DISPATCH", state.stores);
 }
 

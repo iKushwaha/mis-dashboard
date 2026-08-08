@@ -1,18 +1,4 @@
-// Default Return to Vendor/Origin Dataset
-const DEFAULT_ENTRIES = [
-  { id: "rtv-1", warehouseLocation: "Amazon FC - Bhiwandi", channelName: "Amazon", receiveDate: "2026-07-30", receivedQty: 150, unboxingStatus: "DONE", videoUploadStatus: "UPLOADED", booking: "BOOKED", notes: "-" },
-  { id: "rtv-2", warehouseLocation: "Amazon FC - Bhiwandi", channelName: "Amazon", receiveDate: "2026-07-31", receivedQty: 85, unboxingStatus: "DONE", videoUploadStatus: "UPLOADED", booking: "BOOKED", notes: "-" },
-  { id: "rtv-3", warehouseLocation: "Flipkart WH - Bhiwandi", channelName: "Flipkart", receiveDate: "2026-07-31", receivedQty: 120, unboxingStatus: "IN PROGRESS", videoUploadStatus: "UPLOADED", booking: "IN PROGRESS", notes: "Mixed SKU batch" },
-  { id: "rtv-4", warehouseLocation: "Flipkart WH - Bhiwandi", channelName: "Flipkart", receiveDate: "2026-08-01", receivedQty: 60, unboxingStatus: "PENDING", videoUploadStatus: "NOT UPLOADED", booking: "NOT BOOKED", notes: "Awaiting unboxing" },
-  { id: "rtv-5", warehouseLocation: "Meesho Hub - Mumbai", channelName: "Meesho", receiveDate: "2026-08-01", receivedQty: 200, unboxingStatus: "DONE", videoUploadStatus: "UPLOADED", booking: "BOOKED", notes: "-" },
-  { id: "rtv-6", warehouseLocation: "Meesho Hub - Mumbai", channelName: "Meesho", receiveDate: "2026-08-02", receivedQty: 45, unboxingStatus: "DONE", videoUploadStatus: "NOT UPLOADED", booking: "IN PROGRESS", notes: "Video pending review" },
-  { id: "rtv-7", warehouseLocation: "Myntra WH - Bhiwandi", channelName: "Myntra", receiveDate: "2026-08-01", receivedQty: 90, unboxingStatus: "DONE", videoUploadStatus: "UPLOADED", booking: "BOOKED", notes: "-" },
-  { id: "rtv-8", warehouseLocation: "Myntra WH - Bhiwandi", channelName: "Myntra", receiveDate: "2026-08-02", receivedQty: 30, unboxingStatus: "PENDING", videoUploadStatus: "NOT UPLOADED", booking: "NOT BOOKED", notes: "Damaged carton" },
-  { id: "rtv-9", warehouseLocation: "Ugaoo B2B - Pune", channelName: "Direct B2B", receiveDate: "2026-08-01", receivedQty: 55, unboxingStatus: "DONE", videoUploadStatus: "UPLOADED", booking: "BOOKED", notes: "-" },
-  { id: "rtv-10", warehouseLocation: "Ugaoo B2B - Pune", channelName: "Direct B2B", receiveDate: "2026-08-02", receivedQty: 35, unboxingStatus: "IN PROGRESS", videoUploadStatus: "UPLOADED", booking: "BOOKED", notes: "Partial return" },
-  { id: "rtv-11", warehouseLocation: "Amazon FC - Bhiwandi", channelName: "Amazon", receiveDate: "2026-08-02", receivedQty: 70, unboxingStatus: "DONE", videoUploadStatus: "UPLOADED", booking: "BOOKED", notes: "-" },
-  { id: "rtv-12", warehouseLocation: "Flipkart WH - Bhiwandi", channelName: "Flipkart", receiveDate: "2026-08-02", receivedQty: 95, unboxingStatus: "DONE", videoUploadStatus: "UPLOADED", booking: "IN PROGRESS", notes: "Booking in queue" }
-];
+// RTV return entries start empty; users create their own records.
 
 // State Manager
 let state = {
@@ -59,16 +45,18 @@ function getBookingClass(status) {
 
 // Load and Initialize App State
 function initApp() {
-  const savedEntries = localStorage.getItem("rtv_entries_v1");
+  ["rtv_entries_v1", "rtv_entries_v2"].forEach(k => localStorage.removeItem(k));
+
+  const savedEntries = localStorage.getItem("rtv_entries_v3");
   if (savedEntries) {
     try {
       state.entries = JSON.parse(savedEntries);
     } catch (e) {
-      console.error("Error parsing saved RTV data, falling back to default.", e);
-      state.entries = [...DEFAULT_ENTRIES];
+      console.error("Error parsing saved RTV data, starting with an empty set.", e);
+      state.entries = [];
     }
   } else {
-    state.entries = [...DEFAULT_ENTRIES];
+    state.entries = [];
     saveState();
   }
 
@@ -93,7 +81,7 @@ function initApp() {
 }
 
 function saveState() {
-  localStorage.setItem("rtv_entries_v1", JSON.stringify(state.entries));
+  localStorage.setItem("rtv_entries_v3", JSON.stringify(state.entries));
   if (window.DataService) DataService.push("RTV", state.entries);
 }
 

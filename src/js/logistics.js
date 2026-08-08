@@ -1,7 +1,7 @@
 // B2B & B2C Daily Logistics & Order Dispatch Report
 (function () {
-  const STORAGE_KEY = "logistics_dispatch_v1";
-  const SHORT_STORAGE_KEY = "logistics_short_sku_v1";
+  const STORAGE_KEY = "logistics_dispatch_v3";
+  const SHORT_STORAGE_KEY = "logistics_short_sku_v3";
 
   // ---- Configuration ----
   const CONFIG_KEY = "logistics_config_v1";
@@ -225,71 +225,6 @@
 
   // ---- Sample data baseline ----
   // [dispatchDate, location, channel, poQty, dispatchQty, deliveryOffsetDays]
-  const SAMPLE = [
-    ["2026-08-08", "Kundli", "Blinkit", 500, 500, 0],
-    ["2026-08-08", "Kundli", "FK Consignment", 780, 780, 0],
-    ["2026-08-08", "Kundli", "Delhivery B2C", 320, 280, 2],
-    ["2026-08-08", "Kundli", "DTDC B2C", 174, 70, 1],
-    ["2026-08-08", "Farukh Nagar SR", "Blinkit", 450, 320, 0],
-    ["2026-08-08", "Farukh Nagar SR", "FK Consignment", 960, 960, 0],
-    ["2026-08-08", "Farukh Nagar SR", "Blue Dart B2C", 210, 210, 2],
-    ["2026-08-08", "Farukh Nagar SR", "Ekart B2C", 150, 95, 2],
-    ["2026-08-08", "Dasna D3", "FK Consignment", 1200, 1180, 0],
-    ["2026-08-08", "Dasna D3", "Zomato Instant", 380, 380, 1],
-    ["2026-08-08", "Dasna D3", "DTDC B2C", 260, 140, 2],
-    ["2026-08-08", "Dasna D3", "Delhivery B2C", 190, 170, 2],
-    ["2026-08-08", "Noida N1", "Blinkit", 640, 640, 0],
-    ["2026-08-08", "Noida N1", "FK Consignment", 850, 610, 1],
-    ["2026-08-08", "Noida N1", "Ekart B2C", 300, 300, 0],
-    ["2026-08-08", "Noida N1", "Blue Dart B2C", 180, 100, 2],
-    ["2026-08-08", "Lucknow L5", "FK Consignment", 700, 700, 0],
-    ["2026-08-08", "Lucknow L5", "Blinkit", 420, 250, 1],
-    ["2026-08-08", "Lucknow L5", "Delhivery B2C", 230, 200, 2],
-    ["2026-08-08", "Lucknow L5", "DTDC B2C", 120, 120, 0],
-    ["2026-08-08", "Sanpka", "Blinkit", 510, 510, 0],
-    ["2026-08-08", "Sanpka", "FK Consignment", 660, 660, 0],
-    ["2026-08-08", "Sanpka", "Ekart B2C", 240, 180, 2],
-    ["2026-08-08", "Sanpka", "Zomato Instant", 350, 300, 1],
-    ["2026-08-08", "Rajpura R2", "FK Consignment", 900, 540, 0],
-    ["2026-08-08", "Rajpura R2", "Blinkit", 470, 470, 0],
-    ["2026-08-08", "Rajpura R2", "Blue Dart B2C", 160, 90, 2],
-    ["2026-08-08", "Rajpura R2", "Delhivery B2C", 205, 185, 2],
-    ["2026-08-05", "Kundli", "FK Consignment", 720, 720, 1],
-    ["2026-08-05", "Farukh Nagar SR", "Blinkit", 390, 390, 1],
-    ["2026-08-05", "Noida N1", "Delhivery B2C", 280, 210, 2],
-    ["2026-08-06", "Dasna D3", "FK Consignment", 1100, 880, 1],
-    ["2026-08-06", "Lucknow L5", "Blinkit", 460, 460, 1],
-    ["2026-08-06", "Sanpka", "DTDC B2C", 200, 130, 2],
-    ["2026-08-07", "Rajpura R2", "FK Consignment", 830, 830, 1],
-    ["2026-08-07", "Kundli", "Blinkit", 520, 390, 1],
-    ["2026-08-07", "Farukh Nagar SR", "Ekart B2C", 170, 170, 1],
-    ["2026-08-07", "Noida N1", "FK Consignment", 910, 910, 1]
-  ];
-
-  function buildSampleRows() {
-    const seq = {};
-    return SAMPLE.map(([dispatchDate, location, channel, poQty, dispatchQty, offset], i) => {
-      const key = dispatchDate + "|" + location;
-      seq[key] = (seq[key] || 0) + 1;
-      const rate = poQty > 0 ? round2((dispatchQty / poQty) * 100) : 0;
-      const poValue = Math.round(poQty * rateFor(channel));
-      const invoiceValue = Math.round(poValue * (rate / 100));
-      return {
-        id: `logi-${i}`,
-        dispatchDate,
-        channel,
-        location,
-        poNumber: `PO-${LOC_CODE[location]}-${String(seq[key]).padStart(4, "0")}`,
-        poQty,
-        dispatchQty,
-        poValue,
-        invoiceValue,
-        deliveryDate: addDaysIso(dispatchDate, offset),
-        fulfillRate: rate
-      };
-    });
-  }
-
   function loadRows() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -300,60 +235,14 @@
         }
       }
     } catch (e) { /* ignore */ }
-    const rows = buildSampleRows();
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
-    } catch (e) { /* ignore */ }
-    return rows;
+    return [];
   }
 
   // ---- Short SKUs (B2B & B2C short-shipment detail) ----
-  // [dispatchDate, location, channel, shortQty, notes]
-  const SHORT_SAMPLE = [
-    ["2026-08-08", "Kundli", "Delhivery B2C", 40, "Carrier capacity shortfall"],
-    ["2026-08-08", "Kundli", "DTDC B2C", 104, "Awaiting stock replenishment"],
-    ["2026-08-08", "Farukh Nagar SR", "Blinkit", 130, "Pickup delayed"],
-    ["2026-08-08", "Farukh Nagar SR", "Ekart B2C", 55, "Inventory mismatch"],
-    ["2026-08-08", "Dasna D3", "FK Consignment", 20, "Packaging shortage"],
-    ["2026-08-08", "Dasna D3", "DTDC B2C", 120, "Awaiting stock replenishment"],
-    ["2026-08-08", "Dasna D3", "Delhivery B2C", 20, "Carrier delay"],
-    ["2026-08-08", "Noida N1", "FK Consignment", 240, "Awaiting stock replenishment"],
-    ["2026-08-08", "Noida N1", "Blue Dart B2C", 80, "Carrier capacity shortfall"],
-    ["2026-08-08", "Lucknow L5", "Blinkit", 170, "Pickup delayed"],
-    ["2026-08-08", "Lucknow L5", "Delhivery B2C", 30, "Awaiting stock replenishment"],
-    ["2026-08-08", "Sanpka", "Ekart B2C", 60, "Inventory mismatch"],
-    ["2026-08-08", "Sanpka", "Zomato Instant", 50, "Pickup delayed"],
-    ["2026-08-08", "Rajpura R2", "FK Consignment", 360, "Awaiting stock replenishment"],
-    ["2026-08-08", "Rajpura R2", "Blue Dart B2C", 70, "Carrier capacity shortfall"],
-    ["2026-08-08", "Rajpura R2", "Delhivery B2C", 20, "Carrier delay"],
-    ["2026-08-05", "Noida N1", "Delhivery B2C", 70, "Awaiting stock replenishment"],
-    ["2026-08-06", "Dasna D3", "FK Consignment", 220, "Awaiting stock replenishment"],
-    ["2026-08-06", "Sanpka", "DTDC B2C", 70, "Carrier delay"],
-    ["2026-08-07", "Kundli", "Blinkit", 130, "Pickup delayed"]
-  ];
-
   function genShortPoNumber(date, location) {
     const prefix = LOC_CODE[location] || "XX";
     const count = state.shortRows.filter(r => r.location === location && r.dispatchDate === date).length + 1;
     return `PO-${prefix}-${String(count).padStart(4, "0")}`;
-  }
-
-  function buildSampleShortRows() {
-    const seq = {};
-    return SHORT_SAMPLE.map(([dispatchDate, location, channel, shortQty, notes], i) => {
-      const key = dispatchDate + "|" + location;
-      seq[key] = (seq[key] || 0) + 1;
-      return {
-        id: `short-${i}`,
-        dispatchDate,
-        channel,
-        location,
-        poNumber: `PO-${LOC_CODE[location]}-${String(seq[key]).padStart(4, "0")}`,
-        shortQty,
-        invoiceValue: Math.round(shortQty * rateFor(channel)),
-        notes
-      };
-    });
   }
 
   function normalizeShortRow(r) {
@@ -388,11 +277,7 @@
         }
       }
     } catch (e) { /* ignore */ }
-    const rows = buildSampleShortRows();
-    try {
-      localStorage.setItem(SHORT_STORAGE_KEY, JSON.stringify(rows));
-    } catch (e) { /* ignore */ }
-    return rows;
+    return [];
   }
 
   // ---- Theme ----
@@ -1705,6 +1590,8 @@
   }
 
   function init() {
+    ["logistics_dispatch_v1", "logistics_dispatch_v2", "logistics_short_sku_v1", "logistics_short_sku_v2"].forEach(k => localStorage.removeItem(k));
+
     if (typeof ChartDataLabels !== "undefined") {
       Chart.register(ChartDataLabels);
     }

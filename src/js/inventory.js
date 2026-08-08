@@ -1,167 +1,4 @@
-// Default Inventory Cycle Count Dataset
-const DEFAULT_ITEMS = [
-  {"id": "item-1", "itemName": "Ageratum (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G0-04", "systemQty": 81, "physicalQty": 82, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-2", "itemName": "Alfalfa Seeds (Lucerne Grass) - 100 g", "category": "TREE SEED", "binLocation": "R1-PZ1-G5-07", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-3", "itemName": "Alyssum (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G0-04", "systemQty": 55, "physicalQty": 56, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-4", "itemName": "Amaranth Seeds (Chawli Bhaji)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-01", "systemQty": 3, "physicalQty": 3, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-5", "itemName": "Amaranth Seeds (Chawli Bhaji)", "category": "VEGETABLE SEEDS", "binLocation": "R1-GRN-03", "systemQty": 141, "physicalQty": 141, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-6", "itemName": "Amaranth Seeds (Chawli Bhaji) - 100 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-07", "systemQty": 3, "physicalQty": 3, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-7", "itemName": "Amaranth Seeds (Chawli Bhaji) - 250 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-01", "systemQty": 2, "physicalQty": 2, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-8", "itemName": "Amaranthus Mix Seeds", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G0-04", "systemQty": 15, "physicalQty": 15, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-9", "itemName": "Cassia Nodosa Seeds - 100 g", "category": "SEEDS", "binLocation": "R1-PZ1-G1-07", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-10", "itemName": "Antirrhinum (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G0-04", "systemQty": 58, "physicalQty": 50, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-11", "itemName": "Coriander - 250 g", "category": "SEEDS", "binLocation": "R1-PZ1-G2-08", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-12", "itemName": "Arugula Seeds (Rocket Cultivated)", "category": "HERB SEED", "binLocation": "R1-GRN-03", "systemQty": 175, "physicalQty": 181, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-13", "itemName": "Green Chilli Seeds - 100 g", "category": "SEEDS", "binLocation": "R1-PZ1-G3-08", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-14", "itemName": "Ash Gourd Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-GRN-01", "systemQty": 79, "physicalQty": 79, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-15", "itemName": "Aster Mix (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G0-04", "systemQty": 80, "physicalQty": 80, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-16", "itemName": "Aster Mix Seeds - 25 g", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G2-07", "systemQty": 4, "physicalQty": 4, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-17", "itemName": "Balsam Mix - 25 g", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G6-06", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-18", "itemName": "Balsam Mix (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G5-05", "systemQty": 1567, "physicalQty": 1569, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-19", "itemName": "Teak Seeds (Tectoma Grandis) - 100 g", "category": "SEEDS", "binLocation": "R1-PZ1-G5-07", "systemQty": 2, "physicalQty": 2, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-20", "itemName": "Beetroot Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G4-01", "systemQty": 36, "physicalQty": 38, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-21", "itemName": "Beetroot Seeds - 100 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G0-08", "systemQty": 0, "physicalQty": 0, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-22", "itemName": "Beetroot Seeds - 25 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G4-01", "systemQty": 3, "physicalQty": 3, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-23", "itemName": "Bittergourd Seeds (Green Long)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-04", "systemQty": 39, "physicalQty": 39, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-24", "itemName": "Green Chilli Seeds - 25 g", "category": "SEEDS", "binLocation": "R1-PZ1-G4-08", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-25", "itemName": "Black Brinjal Seeds (Long)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G4-01", "systemQty": 23, "physicalQty": 22, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-26", "itemName": "Black Brinjal Seeds (Round)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G4-01", "systemQty": 21, "physicalQty": 21, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-27", "itemName": "Doob Grass Seeds (Carpet Lawn) - 250 g", "category": "SEEDS", "binLocation": "R1-PZ1-G6-07", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-28", "itemName": "Red Amaranthus Seeds (Red Math) - 250 g", "category": "SEEDS", "binLocation": "R1-PZ1-G5-08", "systemQty": 2, "physicalQty": 2, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-29", "itemName": "Bottlegourd Seeds (Long)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-03", "systemQty": 59, "physicalQty": 59, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-30", "itemName": "Brinjal Banarshi Giant - 25 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G3-01", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-31", "itemName": "Brinjal Banarshi Giant Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G3-01", "systemQty": 18, "physicalQty": 18, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-32", "itemName": "Brinjal Kateri Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G3-01", "systemQty": 48, "physicalQty": 48, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-33", "itemName": "Brinjal Kateri Seeds - 25 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-07", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-34", "itemName": "Broccoli Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-01", "systemQty": 2454, "physicalQty": 2462, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-35", "itemName": "Cabbage Seeds - 25 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-01", "systemQty": 0, "physicalQty": 0, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-36", "itemName": "Calendula - 25 g", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G6-06", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-37", "itemName": "Calendula (100 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G3-02", "systemQty": 0, "physicalQty": 0, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-38", "itemName": "Calendula (100 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G5-05", "systemQty": 16, "physicalQty": 16, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-39", "itemName": "Cantaloupe Seeds (Muskmelon)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-01", "systemQty": 66, "physicalQty": 66, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-40", "itemName": "Capsicum Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G1-01", "systemQty": 1638, "physicalQty": 1633, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-41", "itemName": "Carnation (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ4-BULK-01", "systemQty": 1607, "physicalQty": 1610, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-42", "itemName": "Carrot Nantes Seeds (Improved)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G1-01", "systemQty": 46, "physicalQty": 48, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-43", "itemName": "Cassia Grandis Seeds - 100 g", "category": "TREE SEED", "binLocation": "R1-PZ1-G4-08", "systemQty": 2, "physicalQty": 2, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-44", "itemName": "Ipomoea - 25 g", "category": "SEEDS", "binLocation": "R1-PZ1-G6-06", "systemQty": 2, "physicalQty": 2, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-45", "itemName": "Cassia Javanica Seeds (Pink Shower Tree) - 100 g", "category": "TREE SEED", "binLocation": "R1-PZ1-G1-08", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-46", "itemName": "Cauliflower Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G1-01", "systemQty": 37, "physicalQty": 39, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-47", "itemName": "Cauliflower Seeds - 25 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G4-06", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-48", "itemName": "Celery Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G0-01", "systemQty": 64, "physicalQty": 64, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-49", "itemName": "Celosia Cristata (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G4-05", "systemQty": 132, "physicalQty": 114, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-50", "itemName": "Celosia Plumosa (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-RTO-GOOD", "systemQty": 37, "physicalQty": 37, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-51", "itemName": "Cherry Tomato Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G0-01", "systemQty": 1844, "physicalQty": 1850, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-52", "itemName": "Cherry Tomatoes Seeds (Yellow)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-02", "systemQty": 81, "physicalQty": 81, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-53", "itemName": "Cherry Tomatoes Seeds (Yellow)", "category": "VEGETABLE SEEDS", "binLocation": "R1-GRN-01", "systemQty": 50, "physicalQty": 50, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-54", "itemName": "Desi Carrot Seeds (Long)", "category": "SEEDS", "binLocation": "R1-PZ1-G3-04", "systemQty": 17, "physicalQty": 17, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-55", "itemName": "Chinese Cabbage Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G0-01", "systemQty": 11, "physicalQty": 11, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-56", "itemName": "Chives Seeds", "category": "HERB SEED", "binLocation": "R1-GRN-03", "systemQty": 47, "physicalQty": 49, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-57", "itemName": "Chrysanthemum Mix Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-GRN-01", "systemQty": 1363, "physicalQty": 1346, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-58", "itemName": "Cluster Beans - 100 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-02", "systemQty": 4, "physicalQty": 4, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-59", "itemName": "Cluster Beans - 250 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-02", "systemQty": 2, "physicalQty": 2, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-60", "itemName": "Cluster Beans Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-02", "systemQty": 43, "physicalQty": 43, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-61", "itemName": "Coreopsis (100 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G4-05", "systemQty": 8, "physicalQty": 8, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-62", "itemName": "Coriander Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-GRN-01", "systemQty": 1022, "physicalQty": 1036, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-63", "itemName": "Cosmos Mix (100 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-GRN-01", "systemQty": 2740, "physicalQty": 2747, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-64", "itemName": "Dahlia (100 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G2-05", "systemQty": 2550, "physicalQty": 2571, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-65", "itemName": "Dahlia Seeds - 25 g", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G2-05", "systemQty": 2, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "1 bad units"},
-  {"id": "item-66", "itemName": "Gongura Seeds (Ambadi)", "category": "SEEDS", "binLocation": "R1-PZ1-G2-02", "systemQty": 40, "physicalQty": 40, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-67", "itemName": "Dianthus Mix - 25 g", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G5-05", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-68", "itemName": "Dianthus Mix (100 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G3-02", "systemQty": 98, "physicalQty": 90, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-69", "itemName": "Dill Leaves Seeds (Suwa) - 250 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-GRN-03", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-70", "itemName": "Doob Grass Seeds (Carpet Lawn) - 100 g", "category": "TREE SEED", "binLocation": "R1-PZ1-G4-07", "systemQty": 9, "physicalQty": 9, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-71", "itemName": "Drumstick Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G4-02", "systemQty": 196, "physicalQty": 200, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-72", "itemName": "Eucalyptus Redgum Seeds - 100 g", "category": "TREE SEED", "binLocation": "R1-PZ1-G4-07", "systemQty": 3, "physicalQty": 3, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-73", "itemName": "Fennel Seeds", "category": "HERB SEED", "binLocation": "R1-PZ1-G3-06", "systemQty": 118, "physicalQty": 100, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-74", "itemName": "Fenugreek Seeds (Methi)", "category": "VEGETABLE SEEDS", "binLocation": "R1-GRN-01", "systemQty": 19, "physicalQty": 25, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-75", "itemName": "French Bean Seeds - 250 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-02", "systemQty": 3, "physicalQty": 3, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-76", "itemName": "Gallardia Seeds", "category": "FLOWER SEED", "binLocation": "R1-GRN-03", "systemQty": 54, "physicalQty": 54, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-77", "itemName": "Gomphrena Seeds", "category": "FLOWER SEED", "binLocation": "R1-GRN-03", "systemQty": 46, "physicalQty": 46, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-78", "itemName": "Green Amaranthus Seeds (Green Math)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-02", "systemQty": 97, "physicalQty": 97, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-79", "itemName": "Green Amaranthus Seeds (Green Math) - 100 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-04", "systemQty": 5, "physicalQty": 5, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-80", "itemName": "Green Chilli Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G1-02", "systemQty": 1474, "physicalQty": 1479, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-81", "itemName": "Green Cucumber Seeds (Long)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G0-02", "systemQty": 108, "physicalQty": 109, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-82", "itemName": "Green Cucumber Seeds (Long) - 25 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G3-08", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-83", "itemName": "Green Onion Seeds (Leek)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G0-02", "systemQty": 13, "physicalQty": 13, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-84", "itemName": "Green Peas Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G0-02", "systemQty": 27, "physicalQty": 28, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-85", "itemName": "Gypsophila (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G3-05", "systemQty": 6, "physicalQty": 6, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-86", "itemName": "Helichrysum (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G1-05", "systemQty": 180, "physicalQty": 180, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-87", "itemName": "Indian Laburnum Seeds (Cassia Fistula) - 100 g", "category": "TREE SEED", "binLocation": "R1-PZ1-G1-08", "systemQty": 3, "physicalQty": 3, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-88", "itemName": "Indian Round Gourd Seeds (Tinda)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-03", "systemQty": 41, "physicalQty": 41, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-89", "itemName": "Ipomoea (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-GRN-03", "systemQty": 1672, "physicalQty": 1673, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-90", "itemName": "Italian Basil Seeds", "category": "HERB SEED", "binLocation": "R1-PZ1-G3-06", "systemQty": 1795, "physicalQty": 1826, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-91", "itemName": "Kale Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-03", "systemQty": 216, "physicalQty": 216, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-92", "itemName": "Malabar Spinach Seeds (Poi Saag)", "category": "SEEDS", "binLocation": "R1-PZ1-G4-03", "systemQty": 97, "physicalQty": 97, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-93", "itemName": "Lettuce Iceberg Seeds (Round)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-03", "systemQty": 3, "physicalQty": 3, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-94", "itemName": "Lettuce Iceberg Seeds (Round) - 25 g", "category": "VEGETABLE SEEDS", "binLocation": "R2-PZ1-G1-05", "systemQty": 0, "physicalQty": 0, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-95", "itemName": "Lettuce Romaine Seeds (Long)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-03", "systemQty": 976, "physicalQty": 940, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-96", "itemName": "Lettuce Romaine Seeds (Long) - 25 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G4-03", "systemQty": 2, "physicalQty": 2, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-97", "itemName": "Lettuce Seeds- Black Rose", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G4-03", "systemQty": 24, "physicalQty": 24, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-98", "itemName": "Lettuce Seeds- Lollo Rosso", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G4-03", "systemQty": 11, "physicalQty": 11, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-99", "itemName": "Leucaena Leucocephala Native Variety Seeds - 100 g(Subabool)", "category": "TREE SEED", "binLocation": "R1-PZ1-G4-07", "systemQty": 2, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "1 bad units"},
-  {"id": "item-100", "itemName": "Lotus Flower Seeds  - 30 Seeds", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G1-05", "systemQty": 61, "physicalQty": 61, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-101", "itemName": "Lotus Flower Seeds  - 30 Seeds", "category": "FLOWER SEED", "binLocation": "R1-GRN-03", "systemQty": 55, "physicalQty": 41, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-102", "itemName": "Lotus Flower Seeds - 20 Seeds", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G2-05", "systemQty": 201, "physicalQty": 200, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-103", "itemName": "Lupins (50 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G0-05", "systemQty": 56, "physicalQty": 56, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-104", "itemName": "Marigold African Double (100 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G0-05", "systemQty": 1725, "physicalQty": 1732, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-105", "itemName": "Mesembryanthemum Mix Seeds", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G0-05", "systemQty": 56, "physicalQty": 44, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-106", "itemName": "Mesembryanthemum Mix Seeds - 25g", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G0-08", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-107", "itemName": "Nasturtium Mix (20 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-GRN-01", "systemQty": 1365, "physicalQty": 1364, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-108", "itemName": "Nasturtium Mix (20 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G1-06", "systemQty": 199, "physicalQty": 199, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-109", "itemName": "Okra Seeds (Lady Finger)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G3-03", "systemQty": 1738, "physicalQty": 1734, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-110", "itemName": "Okra Seeds (Lady Finger) - 100 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G3-06", "systemQty": 2, "physicalQty": 2, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-111", "itemName": "Radish Golden Seeds (Pusa Chatki)", "category": "SEEDS", "binLocation": "R1-PZ1-G2-03", "systemQty": 36, "physicalQty": 35, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-112", "itemName": "Okra Seeds (Lady Finger) - 250 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G3-03", "systemQty": 4, "physicalQty": 4, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-113", "itemName": "Oregano Seeds", "category": "HERB SEED", "binLocation": "R4-PZ1-G3-07", "systemQty": 80, "physicalQty": 83, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-114", "itemName": "Pak Choi Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G3-03", "systemQty": 23, "physicalQty": 23, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-115", "itemName": "Pansy Mix (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G5-06", "systemQty": 16, "physicalQty": 15, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-116", "itemName": "Papaya seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-03", "systemQty": 50, "physicalQty": 52, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-117", "itemName": "Green Amaranthus Seeds (Green Math) - 250 g", "category": "SEEDS", "binLocation": "R1-PZ1-G1-02", "systemQty": 2, "physicalQty": 2, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-118", "itemName": "Parsley Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-03", "systemQty": 5, "physicalQty": 5, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-119", "itemName": "Fenugreek Seeds (Methi) - 250 g", "category": "SEEDS", "binLocation": "R1-PZ1-G3-02", "systemQty": 2, "physicalQty": 2, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-120", "itemName": "Petunia Mix (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G5-06", "systemQty": 1343, "physicalQty": 1345, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-121", "itemName": "Poppy Mix (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G5-06", "systemQty": 308, "physicalQty": 309, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-122", "itemName": "Portulaca Mix (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G1-06", "systemQty": 1183, "physicalQty": 1185, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-123", "itemName": "Purple Basil Seeds", "category": "HERB SEED", "binLocation": "R1-PZ1-G3-06", "systemQty": 24, "physicalQty": 26, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-124", "itemName": "Purple Basil Seeds", "category": "HERB SEED", "binLocation": "R1-GRN-01", "systemQty": 47, "physicalQty": 47, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-125", "itemName": "Radish Golden Seeds (Pusa Chatki) - 100 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-03", "systemQty": 2, "physicalQty": 2, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-126", "itemName": "Red Amaranthus Seeds (Red Math)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G1-03", "systemQty": 1733, "physicalQty": 1729, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-127", "itemName": "Red Cabbage Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G1-03", "systemQty": 17, "physicalQty": 17, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-128", "itemName": "Red Capsicum Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G1-02", "systemQty": 52, "physicalQty": 52, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-129", "itemName": "Red Onion Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G0-03", "systemQty": 65, "physicalQty": 65, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-130", "itemName": "Red Onion Seeds - 250 g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G0-03", "systemQty": 4, "physicalQty": 2, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "2 bad units"},
-  {"id": "item-131", "itemName": "Red Pumpkin Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-04", "systemQty": 10, "physicalQty": 10, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-132", "itemName": "Red Round Radish Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G0-03", "systemQty": 27, "physicalQty": 29, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-133", "itemName": "Ridge Gourd Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-04", "systemQty": 66, "physicalQty": 66, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-134", "itemName": "Royal Palm Seeds - 100 g", "category": "TREE SEED", "binLocation": "R1-PZ1-G3-07", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-135", "itemName": "Rudbeckia (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G5-06", "systemQty": 57, "physicalQty": 57, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-136", "itemName": "Sage Seeds", "category": "HERB SEED", "binLocation": "R1-PZ1-G2-06", "systemQty": 105, "physicalQty": 107, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-137", "itemName": "Salvia Blue Seeds", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G1-06", "systemQty": 16, "physicalQty": 16, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-138", "itemName": "Salvia Red (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G5-06", "systemQty": 38, "physicalQty": 38, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-139", "itemName": "Spinach Seeds (Palak)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G4-04", "systemQty": 4011, "physicalQty": 3965, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-140", "itemName": "Spinach Seeds (Palak) - 250g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G5-04", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-141", "itemName": "Star Phlox Mix Seeds", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G4-06", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-142", "itemName": "Sunflower Oil Seeds - 100 g", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G1-07", "systemQty": 6, "physicalQty": 6, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-143", "itemName": "Sunflower Sungold (75 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G1-06", "systemQty": 1233, "physicalQty": 1233, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-144", "itemName": "Sweetcorn Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G3-04", "systemQty": 27, "physicalQty": 27, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-145", "itemName": "Table Palm Seeds - 100 g", "category": "TREE SEED", "binLocation": "R1-PZ1-G3-07", "systemQty": 3, "physicalQty": 3, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-146", "itemName": "Thai Basil Seeds", "category": "HERB SEED", "binLocation": "R1-PZ1-G2-06", "systemQty": 90, "physicalQty": 90, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-147", "itemName": "Thyme Seeds", "category": "HERB SEED", "binLocation": "R1-PZ1-G2-06", "systemQty": 1887, "physicalQty": 1874, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-148", "itemName": "Tomato Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-08", "systemQty": 739, "physicalQty": 758, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-149", "itemName": "Tomato Seeds - 100g", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-08", "systemQty": 1, "physicalQty": 1, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-150", "itemName": "Tulsi Seeds (Holy Basil)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-04", "systemQty": 542, "physicalQty": 566, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-151", "itemName": "Vegetable Seeds Bank For Home Garden 35 Varieties -1675 Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-GRN-01", "systemQty": 796, "physicalQty": 726, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-152", "itemName": "Vegetable Seeds Bank For Home Garden 50 Varieties - 2255 Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G0-09", "systemQty": 222, "physicalQty": 173, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "60 bad units"},
-  {"id": "item-153", "itemName": "Vinca (20 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G4-06", "systemQty": 147, "physicalQty": 148, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-154", "itemName": "Watermelon Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-GRN-03", "systemQty": 79, "physicalQty": 79, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-155", "itemName": "White Cucumber Seeds (Khira)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-04", "systemQty": 201, "physicalQty": 201, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-156", "itemName": "White Onion Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G2-04", "systemQty": 58, "physicalQty": 58, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-157", "itemName": "Yellow Capsicum Seeds", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G1-04", "systemQty": 112, "physicalQty": 112, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-158", "itemName": "Zinnia Double Mix Seeds", "category": "FLOWER SEED", "binLocation": "R1-GRN-01", "systemQty": 0, "physicalQty": 0, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-159", "itemName": "Zinnia Double Mix Seeds", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G1-06", "systemQty": 1203, "physicalQty": 1229, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-160", "itemName": "Zinnia Lilliput Mix (200 Seeds)", "category": "FLOWER SEED", "binLocation": "R1-PZ1-G0-06", "systemQty": 1112, "physicalQty": 1118, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-  {"id": "item-161", "itemName": "Zucchini Seeds (Squash)", "category": "VEGETABLE SEEDS", "binLocation": "R1-PZ1-G1-04", "systemQty": 107, "physicalQty": 110, "countedBy": "Pushpendra", "countDate": "2026-08-03", "notes": "-"},
-];
+// Inventory Cycle Count data starts empty; users create their own records.
 
 // State Manager
 let state = {
@@ -236,16 +73,21 @@ function getStatus(item) {
 
 // Load and Initialize App State
 function initApp() {
-  const savedItems = localStorage.getItem("inventory_cycle_count_stores_v3");
+  [
+    "inventory_cycle_count_stores_v3",
+    "inventory_cycle_count_stores_v4"
+  ].forEach(k => localStorage.removeItem(k));
+
+  const savedItems = localStorage.getItem("inventory_cycle_count_stores_v5");
   if (savedItems) {
     try {
       state.items = JSON.parse(savedItems);
     } catch (e) {
-      console.error("Error parsing saved cycle count data, falling back to default.", e);
-      state.items = [...DEFAULT_ITEMS];
+      console.error("Error parsing saved cycle count data, starting with an empty set.", e);
+      state.items = [];
     }
   } else {
-    state.items = [...DEFAULT_ITEMS];
+    state.items = [];
     saveState();
   }
 
@@ -279,7 +121,7 @@ function initApp() {
 }
 
 function saveState() {
-  localStorage.setItem("inventory_cycle_count_stores_v3", JSON.stringify(state.items));
+  localStorage.setItem("inventory_cycle_count_stores_v5", JSON.stringify(state.items));
   if (window.DataService) DataService.push("INVENTORY", state.items);
 }
 

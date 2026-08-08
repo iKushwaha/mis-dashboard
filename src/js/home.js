@@ -171,10 +171,10 @@
   }
 
   function render() {
-    let stores = read("warehouse_dashboard_stores_v2") || [];
-    let items = read("inventory_cycle_count_stores_v3") || [];
-    let entries = read("rtv_entries_v1") || [];
-    const manualWork = read("daily_work_entries_v1") || [];
+    let stores = read("warehouse_dashboard_stores_v5") || [];
+    let items = read("inventory_cycle_count_stores_v5") || [];
+    let entries = read("rtv_entries_v3") || [];
+    const manualWork = read("daily_work_entries_v3") || [];
     let filteredManual = manualWork;
 
     if (window.DateFilter) {
@@ -276,9 +276,9 @@
   (async function syncFromCloud() {
     if (!window.DataService || !DataService.ready) return;
     const mapping = {
-      STORE_DISPATCH: "warehouse_dashboard_stores_v2",
-      INVENTORY: "inventory_cycle_count_stores_v3",
-      RTV: "rtv_entries_v1"
+      STORE_DISPATCH: "warehouse_dashboard_stores_v5",
+      INVENTORY: "inventory_cycle_count_stores_v5",
+      RTV: "rtv_entries_v3"
     };
     let changed = false;
     for (const [table, key] of Object.entries(mapping)) {

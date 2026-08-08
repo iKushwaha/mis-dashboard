@@ -1,20 +1,28 @@
 # Data Model
 
-All application data lives in the browser's `localStorage`. There is no backend
-or database. Keys must never be renamed - existing users' data depends on them.
+All application data lives in the browser's `localStorage`, optionally synced to
+Supabase. There is no backend to manage. Keys must never be renamed - existing
+users' data depends on them.
 
 | Storage key | Owned by | Content |
 | --- | --- | --- |
-| `warehouse_dashboard_stores_v2` | `src/js/app.js` | Store Dispatch records |
-| `inventory_cycle_count_stores_v3` | `src/js/inventory.js` | Cycle Count records |
-| `rtv_entries_v1` | `src/js/rtv.js` | RTV return entries |
-| `daily_work_entries_v1` | `src/js/daily-work.js` | Manual Daily Work entries |
+| `warehouse_dashboard_stores_v5` | `src/js/app.js` | Store Dispatch records |
+| `inventory_cycle_count_stores_v5` | `src/js/inventory.js` | Cycle Count records |
+| `rtv_entries_v3` | `src/js/rtv.js` | RTV return entries |
+| `daily_work_entries_v3` | `src/js/daily-work.js` | Manual Daily Work entries |
+| `daily_work_overrides_v3` | `src/js/daily-work.js` | Daily Work synced-row overrides |
+| `daily_work_hidden_v3` | `src/js/daily-work.js` | Daily Work hidden synced rows |
+| `logistics_dispatch_v3` | `src/js/logistics.js` | Logistics dispatch records |
+| `logistics_short_sku_v3` | `src/js/logistics.js` | Logistics short-SKU records |
+| `logistics_config_v1` | `src/js/logistics.js` | Logistics channels + locations config |
+| `warehouse_dashboard_photos_v1` | `src/js/app.js` | Store Dispatch photo gallery |
 | `warehouse_dashboard_theme` | all pages | Shared `dark` / `light` theme |
 
-When a key is absent or unparseable, the page seeds defaults from the
-`DEFAULT_*` constant at the top of its owning JS file.
+Every report starts with an **empty** dataset - there is no seeded or sample
+data. Users create the first records via the Add form, the Import wizard, or
+cloud sync from Supabase.
 
-## Store Dispatch (`warehouse_dashboard_stores_v2`)
+## Store Dispatch (`warehouse_dashboard_stores_v5`)
 
 Array of records:
 
@@ -54,7 +62,7 @@ Derived per detail: `variance = poQty - sentQty`, `variancePct = variance / poQt
 
 A store with `poQty > sentQty` is flagged **DETAILS PENDING** in the report until at least one shortage detail is uploaded.
 
-## Inventory Cycle Count (`inventory_cycle_count_stores_v3`)
+## Inventory Cycle Count (`inventory_cycle_count_stores_v5`)
 
 Array of records:
 
@@ -74,7 +82,7 @@ Array of records:
 Derived per record: `variance = systemQty - physicalQty`; a record matches when
 `variance === 0`.
 
-## Daily Work (`daily_work_entries_v1`)
+## Daily Work (`daily_work_entries_v3`)
 
 Array of *manual* work entries (work submitted in the other three reports is
 never stored here - it is aggregated live from their keys at render time):
@@ -101,7 +109,7 @@ Synced items are marked `SYNCED` in the log and cannot be edited/deleted there;
 update them in their owning report and they re-sync automatically (the page also
 listens for `storage` events so edits in other tabs refresh it live).
 
-## RTV Entries (`rtv_entries_v1`)
+## RTV Entries (`rtv_entries_v3`)
 
 Array of records:
 

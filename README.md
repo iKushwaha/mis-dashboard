@@ -44,11 +44,14 @@ All data persists in the browser's LocalStorage:
 
 | Dashboard | Storage key |
 | --- | --- |
-| Daily Work Report (manual entries) | `daily_work_entries_v1` |
-| Store Dispatch | `warehouse_dashboard_stores_v2` |
-| Inventory Cycle Count | `inventory_cycle_count_stores_v3` |
-| RTV | `rtv_entries_v1` |
+| Daily Work Report (manual entries) | `daily_work_entries_v3` |
+| Store Dispatch | `warehouse_dashboard_stores_v5` |
+| Inventory Cycle Count | `inventory_cycle_count_stores_v5` |
+| RTV | `rtv_entries_v3` |
 | Theme (shared) | `warehouse_dashboard_theme` |
+
+Every report starts **empty** — there is no seeded or sample data. All records
+are created by users (Add form, bulk import, or cloud sync from Supabase).
 
 ## Tech Stack
 
@@ -108,5 +111,5 @@ Use the **report switcher** in the header toolbar (on every page) to jump betwee
 
 ## Notes
 
-- Data is stored locally per browser; clearing site data or switching browsers resets the reports to their seeded defaults.
+- Data is stored locally per browser; clearing site data or switching browsers resets the reports to an empty dataset. Report tables in Supabase can be cleared from the Supabase dashboard or SQL Editor (see `supabase/setup.sql`).
 - Tip: use **Export CSV** to download a template, bulk-edit it in a spreadsheet, then re-import it.

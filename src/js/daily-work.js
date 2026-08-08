@@ -1,17 +1,17 @@
 // Daily Work Report — aggregates work from Store Dispatch, Inventory Cycle Count,
 // RTV, and manual work entries into a single dynamic daily operations dashboard.
-const DAILY_WORK_STORAGE_KEY = "daily_work_entries_v1";
-const DAILY_WORK_OVERRIDE_KEY = "daily_work_overrides_v1";
-const DAILY_WORK_HIDDEN_KEY = "daily_work_hidden_v1";
+const DAILY_WORK_STORAGE_KEY = "daily_work_entries_v3";
+const DAILY_WORK_OVERRIDE_KEY = "daily_work_overrides_v3";
+const DAILY_WORK_HIDDEN_KEY = "daily_work_hidden_v3";
 
 const WORK_STATUSES = ["COMPLETED", "IN PROGRESS", "PENDING"];
 const WORK_REPORTS = ["STORE DISPATCH", "INVENTORY", "RTV", "MANUAL"];
 const WORK_TYPE_OPTIONS = ["Dispatch", "Cycle Count", "Return Processing", "Quality Check", "Packing & Labelling", "Putaway / Staging", "Dispatch Documentation", "Picklist", "Delivery Challan"];
 
 const REPORT_SOURCES = {
-  STORE_DISPATCH: "warehouse_dashboard_stores_v2",
-  INVENTORY: "inventory_cycle_count_stores_v3",
-  RTV: "rtv_entries_v1"
+  STORE_DISPATCH: "warehouse_dashboard_stores_v5",
+  INVENTORY: "inventory_cycle_count_stores_v5",
+  RTV: "rtv_entries_v3"
 };
 
 // State Manager
@@ -1009,6 +1009,12 @@ function setupEventListeners() {
 
 // Load and Initialize App State
 function initApp() {
+  [
+    "daily_work_entries_v1", "daily_work_entries_v2",
+    "daily_work_overrides_v1", "daily_work_overrides_v2",
+    "daily_work_hidden_v1", "daily_work_hidden_v2"
+  ].forEach(k => localStorage.removeItem(k));
+
   state.theme = localStorage.getItem("warehouse_dashboard_theme") || "dark";
   document.documentElement.setAttribute("data-theme", state.theme);
   updateThemeIcon();
